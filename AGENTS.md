@@ -34,9 +34,10 @@ No automated test suite is currently checked in.
 - When adding tests later, place TS tests under `src/**/__tests__` and Rust tests near modules with `#[cfg(test)]`.
 
 ## Commit & Pull Request Guidelines
-The repository has no commit history yet; use Conventional Commits going forward.
+Use Conventional Commits and require GPG-signed commits.
 
 - Commit format: `type(scope): summary` (e.g., `feat(tray): add left-click restore`).
+- All commits must be GPG signed (`git commit -S ...`); unsigned commits should be amended with `git commit --amend -S`.
 - Keep commits focused and atomic; avoid mixing UI and backend refactors.
 - PRs should include: purpose, key changes, verification steps, and screenshots/GIFs for UI updates.
 - Link related issues and call out Windows-specific behavior or registry impacts.
