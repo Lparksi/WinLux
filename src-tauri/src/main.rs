@@ -4,10 +4,19 @@ mod commands;
 mod models;
 mod tray;
 
+use tauri::Manager;
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
             tray::setup_tray(&app.handle())?;
+
+            if let Some(window) = app.get_webview_window("main") {
+                if let Ok(theme_state) = commands::get_theme_state() {
+                    commands::apply_window_theme(&window, theme_state.apps);
+                }
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

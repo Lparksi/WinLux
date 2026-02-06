@@ -1,5 +1,25 @@
 use crate::models::{ThemeMode, ThemeState};
 
+#[cfg(target_os = "windows")]
+fn to_tauri_theme(mode: ThemeMode) -> tauri::utils::Theme {
+    match mode {
+        ThemeMode::Light => tauri::utils::Theme::Light,
+        ThemeMode::Dark => tauri::utils::Theme::Dark,
+    }
+}
+
+pub fn apply_window_theme(window: &tauri::WebviewWindow, mode: ThemeMode) {
+    #[cfg(target_os = "windows")]
+    {
+        let _ = window.set_theme(Some(to_tauri_theme(mode)));
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = (window, mode);
+    }
+}
+
 #[tauri::command]
 pub fn get_theme_state() -> Result<ThemeState, String> {
     #[cfg(target_os = "windows")]
@@ -43,7 +63,7 @@ pub fn get_theme_state() -> Result<ThemeState, String> {
 }
 
 #[tauri::command]
-pub fn set_theme_state(state: ThemeState) -> Result<ThemeState, String> {
+pub fn set_theme_state(_window: tauri::WebviewWindow, state: ThemeState) -> Result<ThemeState, String> {
     #[cfg(target_os = "windows")]
     {
         use winreg::enums::{HKEY_CURRENT_USER, KEY_SET_VALUE};
@@ -66,6 +86,7 @@ pub fn set_theme_state(state: ThemeState) -> Result<ThemeState, String> {
             .map_err(|e| format!("写入 SystemUsesLightTheme 失败: {e}"))?;
 
         broadcast_theme_changed();
+        apply_window_theme(&_window, state.apps);
         get_theme_state()
     }
 

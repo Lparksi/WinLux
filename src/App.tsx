@@ -84,6 +84,12 @@ function App() {
   const isLightSelected =
     themeState?.apps === 'light' && themeState?.system === 'light'
 
+  const uiTheme = themeState?.apps ?? 'dark'
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', uiTheme)
+  }, [uiTheme])
+
   return (
     <main className="app">
       <section className="card">
