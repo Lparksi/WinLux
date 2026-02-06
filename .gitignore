@@ -1,0 +1,10 @@
+node_modules
+dist/*
+!dist/.gitkeep
+*.log
+
+target
+src-tauri/target
+
+.DS_Store
+Thumbs.db
