@@ -67,6 +67,7 @@ jobs:
         shell: pwsh
         run: |
           $semverPattern = '^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$'
+          $msiCompatiblePattern = '^\d+\.\d+\.\d+(?:-(\d+))?(?:\+[0-9A-Za-z.-]+)?$'
           $isTag = '${{ github.ref_type }}' -eq 'tag'
 
           if ($isTag) {
@@ -75,6 +76,18 @@ jobs:
             if (-not $normalized -or -not ($normalized -match $semverPattern)) {
               throw "tag 必须是 semver（例如 v1.2.3）"
             }
+
+            if (-not ($normalized -match $msiCompatiblePattern)) {
+              throw "MSI 目标要求预发布标识必须是纯数字（例如 v1.2.3-123）"
+            }
+
+            if ($Matches[1]) {
+              $preNumber = [int]$Matches[1]
+              if ($preNumber -gt 65535) {
+                throw "MSI 目标要求预发布标识不能大于 65535"
+              }
+            }
+
             $version = $normalized
             $source = "tag:$rawTag"
           } else {
@@ -92,9 +105,17 @@ jobs:
             if (-not ($baseVersion -match $semverPattern)) {
               $baseVersion = '0.0.1'
             }
-            $shortHash = (git rev-parse --short HEAD).Trim()
-            $version = "$baseVersion-$shortHash"
-            $source = "prev-tag:$rawTag + sha:$shortHash"
+
+            if ($baseVersion -match '^(\d+\.\d+\.\d+)') {
+              $baseVersion = $Matches[1]
+            } else {
+              $baseVersion = '0.0.1'
+            }
+
+            $runNumber = [int]'${{ github.run_number }}'
+            $preNumber = [Math]::Min($runNumber, 65535)
+            $version = "$baseVersion-$preNumber"
+            $source = "prev-tag:$rawTag + run:$runNumber"
           }
 
           "version=$version" >> $env:GITHUB_OUTPUT
