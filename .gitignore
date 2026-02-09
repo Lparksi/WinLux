@@ -5,6 +5,10 @@ dist/*
 
 target
 src-tauri/target
+src-tauri/target-local/
+
+AGENTS.md
+.claude/
 
 .DS_Store
 Thumbs.db

@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getThemeState, setThemeState, ThemeState } from './lib/tauri'
+import { listen } from '@tauri-apps/api/event'
+import {
+  getThemeState,
+  setThemeState,
+  ThemeState,
+  THEME_STATE_CHANGED_EVENT,
+} from './lib/tauri'
 
 type ThemeBadgeTone = 'neutral' | 'good' | 'mix'
 
@@ -10,10 +16,6 @@ function App() {
 
   const registryPath =
     'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize'
-
-  const isWindows = useMemo(() => {
-    return navigator.userAgent.toLowerCase().includes('windows')
-  }, [])
 
   const refreshTheme = async () => {
     setThemeLoading(true)
@@ -30,6 +32,40 @@ function App() {
 
   useEffect(() => {
     void refreshTheme()
+  }, [])
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined
+
+    void listen<ThemeState>(THEME_STATE_CHANGED_EVENT, (event) => {
+      setThemeStateLocal(event.payload)
+      setThemeError(null)
+      setThemeLoading(false)
+    }).then((fn) => {
+      unlisten = fn
+    })
+
+    return () => {
+      if (unlisten) {
+        unlisten()
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    const syncWhenVisible = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshTheme()
+      }
+    }
+
+    window.addEventListener('focus', syncWhenVisible)
+    document.addEventListener('visibilitychange', syncWhenVisible)
+
+    return () => {
+      window.removeEventListener('focus', syncWhenVisible)
+      document.removeEventListener('visibilitychange', syncWhenVisible)
+    }
   }, [])
 
   const updateTheme = async (next: ThemeState) => {
@@ -110,7 +146,7 @@ function App() {
           <button
             type="button"
             className={`btn ${isDarkSelected ? 'btnPrimary' : 'btnSecondary'}`}
-            disabled={!isWindows || themeLoading}
+            disabled={themeLoading}
             aria-pressed={isDarkSelected}
             onClick={() => {
               void updateTheme({ apps: 'dark', system: 'dark' })
@@ -122,7 +158,7 @@ function App() {
           <button
             type="button"
             className={`btn ${isLightSelected ? 'btnPrimary' : 'btnSecondary'}`}
-            disabled={!isWindows || themeLoading}
+            disabled={themeLoading}
             aria-pressed={isLightSelected}
             onClick={() => {
               void updateTheme({ apps: 'light', system: 'light' })
@@ -134,7 +170,7 @@ function App() {
           <button
             type="button"
             className="btn btnGhost btnIcon"
-            disabled={!isWindows || themeLoading}
+            disabled={themeLoading}
             aria-label="刷新状态"
             title="刷新状态"
             onClick={() => {
@@ -167,11 +203,7 @@ function App() {
           </button>
         </div>
 
-        {!isWindows ? (
-          <p className="hint">当前不是 Windows，功能已禁用。</p>
-        ) : (
-          <p className="hint">提示：关闭窗口不会退出，会隐藏到托盘。</p>
-        )}
+        <p className="hint">提示：关闭窗口不会退出，会隐藏到托盘。</p>
 
         <details className="details">
           <summary>更多信息</summary>

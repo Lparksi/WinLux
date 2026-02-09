@@ -1,6 +1,11 @@
 use crate::models::{ThemeMode, ThemeState};
+use std::ffi::OsStr;
+use std::os::windows::ffi::OsStrExt;
+use tauri::{AppHandle, Emitter, Manager};
 
-#[cfg(target_os = "windows")]
+pub const THEME_STATE_CHANGED_EVENT: &str = "theme-state-changed";
+const PERSONALIZE_KEY: &str = "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+
 fn to_tauri_theme(mode: ThemeMode) -> tauri::utils::Theme {
     match mode {
         ThemeMode::Light => tauri::utils::Theme::Light,
@@ -8,100 +13,84 @@ fn to_tauri_theme(mode: ThemeMode) -> tauri::utils::Theme {
     }
 }
 
-pub fn apply_window_theme(window: &tauri::WebviewWindow, mode: ThemeMode) {
-    #[cfg(target_os = "windows")]
-    {
-        let _ = window.set_theme(Some(to_tauri_theme(mode)));
+fn to_theme_value(mode: ThemeMode) -> &'static str {
+    match mode {
+        ThemeMode::Light => "light",
+        ThemeMode::Dark => "dark",
     }
+}
 
-    #[cfg(not(target_os = "windows"))]
-    {
-        let _ = (window, mode);
-    }
+pub fn apply_window_theme(window: &tauri::WebviewWindow, mode: ThemeMode) {
+    let _ = window.set_theme(Some(to_tauri_theme(mode)));
 }
 
 #[tauri::command]
 pub fn get_theme_state() -> Result<ThemeState, String> {
-    #[cfg(target_os = "windows")]
-    {
-        use winreg::enums::{HKEY_CURRENT_USER, KEY_READ};
-        use winreg::RegKey;
+    use winreg::enums::{HKEY_CURRENT_USER, KEY_READ};
+    use winreg::RegKey;
 
-        let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-        let key = hkcu
-            .open_subkey_with_flags(
-                "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-                KEY_READ,
-            )
-            .map_err(|e| format!("打开注册表失败: {e}"))?;
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let key = hkcu
+        .open_subkey_with_flags(PERSONALIZE_KEY, KEY_READ)
+        .map_err(|e| format!("打开注册表失败: {e}"))?;
 
-        let apps_value: u32 = key
-            .get_value("AppsUseLightTheme")
-            .unwrap_or(1);
-        let system_value: u32 = key
-            .get_value("SystemUsesLightTheme")
-            .unwrap_or(1);
+    let apps_value: u32 = key.get_value("AppsUseLightTheme").unwrap_or(1);
+    let system_value: u32 = key.get_value("SystemUsesLightTheme").unwrap_or(1);
 
-        Ok(ThemeState {
-            apps: if apps_value == 0 {
-                ThemeMode::Dark
-            } else {
-                ThemeMode::Light
-            },
-            system: if system_value == 0 {
-                ThemeMode::Dark
-            } else {
-                ThemeMode::Light
-            },
-        })
-    }
-
-    #[cfg(not(target_os = "windows"))]
-    {
-        Err("仅支持 Windows".into())
-    }
+    Ok(ThemeState {
+        apps: if apps_value == 0 {
+            ThemeMode::Dark
+        } else {
+            ThemeMode::Light
+        },
+        system: if system_value == 0 {
+            ThemeMode::Dark
+        } else {
+            ThemeMode::Light
+        },
+    })
 }
 
 #[tauri::command]
-pub fn set_theme_state(_window: tauri::WebviewWindow, state: ThemeState) -> Result<ThemeState, String> {
-    #[cfg(target_os = "windows")]
-    {
-        use winreg::enums::{HKEY_CURRENT_USER, KEY_SET_VALUE};
-        use winreg::RegKey;
-
-        let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-        let key = hkcu
-            .open_subkey_with_flags(
-                "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-                KEY_SET_VALUE,
-            )
-            .map_err(|e| format!("打开注册表失败: {e}"))?;
-
-        let apps_value: u32 = if state.apps == ThemeMode::Dark { 0 } else { 1 };
-        let system_value: u32 = if state.system == ThemeMode::Dark { 0 } else { 1 };
-
-        key.set_value("AppsUseLightTheme", &apps_value)
-            .map_err(|e| format!("写入 AppsUseLightTheme 失败: {e}"))?;
-        key.set_value("SystemUsesLightTheme", &system_value)
-            .map_err(|e| format!("写入 SystemUsesLightTheme 失败: {e}"))?;
-
-        broadcast_theme_changed();
-        apply_window_theme(&_window, state.apps);
-        get_theme_state()
-    }
-
-    #[cfg(not(target_os = "windows"))]
-    {
-        let _ = state;
-        Err("仅支持 Windows".into())
-    }
+pub fn set_theme_state(window: tauri::WebviewWindow, state: ThemeState) -> Result<ThemeState, String> {
+    set_theme_state_for_app(&window.app_handle(), state)
 }
 
-#[cfg(target_os = "windows")]
-fn broadcast_theme_changed() {
-    use std::ffi::OsStr;
-    use std::os::windows::ffi::OsStrExt;
+pub fn set_theme_state_for_app(app: &AppHandle, state: ThemeState) -> Result<ThemeState, String> {
+    use winreg::enums::{HKEY_CURRENT_USER, KEY_SET_VALUE};
+    use winreg::RegKey;
 
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let key = hkcu
+        .open_subkey_with_flags(PERSONALIZE_KEY, KEY_SET_VALUE)
+        .map_err(|e| format!("打开注册表失败: {e}"))?;
+
+    let apps_value: u32 = if state.apps == ThemeMode::Dark { 0 } else { 1 };
+    let system_value: u32 = if state.system == ThemeMode::Dark { 0 } else { 1 };
+
+    key.set_value("AppsUseLightTheme", &apps_value)
+        .map_err(|e| format!("写入 AppsUseLightTheme 失败: {e}"))?;
+    key.set_value("SystemUsesLightTheme", &system_value)
+        .map_err(|e| format!("写入 SystemUsesLightTheme 失败: {e}"))?;
+
+    broadcast_theme_changed();
+    let next_state = get_theme_state()?;
+
+    if let Some(window) = app.get_webview_window("main") {
+        apply_window_theme(&window, next_state.apps);
+
+        let _ = window.emit(THEME_STATE_CHANGED_EVENT, &next_state);
+
+        let apps = to_theme_value(next_state.apps);
+        let script = format!("document.documentElement.setAttribute('data-theme', '{apps}');");
+        let _ = window.eval(&script);
+    }
+
+    let _ = app.emit(THEME_STATE_CHANGED_EVENT, &next_state);
+    Ok(next_state)
+}
+
+fn broadcast_theme_changed() {
     use windows_sys::Win32::UI::WindowsAndMessaging::{
         SendMessageTimeoutW, HWND_BROADCAST, SMTO_ABORTIFHUNG, WM_SETTINGCHANGE,
     };

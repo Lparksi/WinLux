@@ -12,3 +12,5 @@ export const getThemeState = (): Promise<ThemeState> => {
 export const setThemeState = (state: ThemeState): Promise<ThemeState> => {
   return invoke('set_theme_state', { state })
 }
+
+export const THEME_STATE_CHANGED_EVENT = 'theme-state-changed'

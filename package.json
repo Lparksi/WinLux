@@ -1,7 +1,7 @@
 {
   "name": "winlux",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,8 +9,9 @@
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "tauri": "tauri",
-    "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:dev": "bun scripts/tauri-with-version.mjs dev",
+    "tauri:build": "bun scripts/tauri-with-version.mjs build",
+    "release": "bun scripts/tauri-release.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
