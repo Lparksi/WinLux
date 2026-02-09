@@ -92,9 +92,11 @@ jobs:
             $source = "tag:$rawTag"
           } else {
             $rawTag = ''
-            try {
-              $rawTag = (git describe --tags --abbrev=0 --exclude "${{ github.ref_name }}").Trim()
-            } catch {
+            $rawTagOutput = git describe --tags --abbrev=0 --exclude "${{ github.ref_name }}" 2>$null
+            if ($LASTEXITCODE -eq 0 -and $rawTagOutput) {
+              $rawTag = $rawTagOutput.Trim()
+            } else {
+              $global:LASTEXITCODE = 0
             }
 
             if (-not $rawTag) {
