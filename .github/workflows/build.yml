@@ -19,14 +19,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  verify-windows:
-    name: Verify (Windows)
+  build-windows:
+    name: Verify & Build (Windows)
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
+    outputs:
+      version: ${{ steps.version.outputs.version }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -57,39 +61,9 @@ jobs:
       - name: Rust Tests
         run: cargo test -p winlux
 
-  build-windows:
-    name: Build (Windows)
-    needs: verify-windows
-    if: github.event_name != 'pull_request'
-    runs-on: windows-latest
-    timeout-minutes: 60
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: |
-            . -> target
-            src-tauri -> src-tauri/target
-
-      - name: Install Dependencies
-        run: bun install --frozen-lockfile
-
       - name: Resolve Build Version
         id: version
+        if: github.event_name != 'pull_request'
         shell: pwsh
         run: |
           $semverPattern = '^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$'
@@ -130,11 +104,13 @@ jobs:
           Write-Host "Version source: $source"
 
       - name: Build Tauri Bundle
+        if: github.event_name != 'pull_request'
         env:
           WINLUX_VERSION: ${{ steps.version.outputs.version }}
         run: bun run tauri:build
 
       - name: Upload Artifacts
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: winlux-${{ steps.version.outputs.version }}-windows
