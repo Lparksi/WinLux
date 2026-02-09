@@ -166,6 +166,12 @@ h2 {
   margin: 12px 0;
 }
 
+.languageRow {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 6px;
+}
+
 .btnIcon {
   width: 42px;
   padding: 10px;

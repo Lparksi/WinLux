@@ -12,3 +12,10 @@ pub struct ThemeState {
     pub apps: ThemeMode,
     pub system: ThemeMode,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LanguageSettings {
+    pub preference: String,
+    pub resolved: String,
+    pub available: Vec<String>,
+}

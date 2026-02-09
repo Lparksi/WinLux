@@ -1,17 +1,29 @@
 import { useEffect, useMemo, useState } from 'react'
 import { listen } from '@tauri-apps/api/event'
 import {
+  getLanguageSettings,
   getThemeState,
+  LANGUAGE_CHANGED_EVENT,
+  LanguageSettings,
+  setLanguagePreference,
   setThemeState,
   ThemeState,
   THEME_STATE_CHANGED_EVENT,
 } from './lib/tauri'
+import {
+  getLanguageDisplayName,
+  getLanguageMenuLabel,
+  getLanguageOptionLabel,
+  getMessages,
+} from './lib/i18n'
 
 type ThemeBadgeTone = 'neutral' | 'good' | 'mix'
 
 function App() {
   const [themeLoading, setThemeLoading] = useState(false)
   const [themeState, setThemeStateLocal] = useState<ThemeState | null>(null)
+  const [languageLoading, setLanguageLoading] = useState(false)
+  const [languageSettings, setLanguageSettings] = useState<LanguageSettings | null>(null)
   const [themeError, setThemeError] = useState<string | null>(null)
 
   const registryPath =
@@ -30,8 +42,22 @@ function App() {
     }
   }
 
+  const refreshLanguage = async () => {
+    setLanguageLoading(true)
+    setThemeError(null)
+    try {
+      const settings = await getLanguageSettings()
+      setLanguageSettings(settings)
+    } catch (error) {
+      setThemeError(error instanceof Error ? error.message : String(error))
+    } finally {
+      setLanguageLoading(false)
+    }
+  }
+
   useEffect(() => {
     void refreshTheme()
+    void refreshLanguage()
   }, [])
 
   useEffect(() => {
@@ -53,9 +79,28 @@ function App() {
   }, [])
 
   useEffect(() => {
+    let unlisten: (() => void) | undefined
+
+    void listen<LanguageSettings>(LANGUAGE_CHANGED_EVENT, (event) => {
+      setLanguageSettings(event.payload)
+      setThemeError(null)
+      setLanguageLoading(false)
+    }).then((fn) => {
+      unlisten = fn
+    })
+
+    return () => {
+      if (unlisten) {
+        unlisten()
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     const syncWhenVisible = () => {
       if (document.visibilityState === 'visible') {
         void refreshTheme()
+        void refreshLanguage()
       }
     }
 
@@ -67,6 +112,22 @@ function App() {
       document.removeEventListener('visibilitychange', syncWhenVisible)
     }
   }, [])
+
+  const updateLanguagePreference = async (preference: string) => {
+    setLanguageLoading(true)
+    setThemeError(null)
+    try {
+      const settings = await setLanguagePreference(preference)
+      setLanguageSettings(settings)
+    } catch (error) {
+      setThemeError(error instanceof Error ? error.message : String(error))
+    } finally {
+      setLanguageLoading(false)
+    }
+  }
+
+  const currentLanguage = languageSettings?.resolved ?? 'English'
+  const messages = useMemo(() => getMessages(currentLanguage), [currentLanguage])
 
   const updateTheme = async (next: ThemeState) => {
     setThemeLoading(true)
@@ -84,7 +145,7 @@ function App() {
   const currentTheme = useMemo(() => {
     if (!themeState) {
       return {
-        label: '读取中…',
+        label: messages.loading,
         tone: 'neutral' as ThemeBadgeTone,
         detail: '',
       }
@@ -92,35 +153,38 @@ function App() {
 
     if (themeState.apps === 'dark' && themeState.system === 'dark') {
       return {
-        label: '深色',
+        label: messages.dark,
         tone: 'good' as ThemeBadgeTone,
-        detail: '应用与系统均为深色模式',
+        detail: messages.bothDark,
       }
     }
 
     if (themeState.apps === 'light' && themeState.system === 'light') {
       return {
-        label: '浅色',
+        label: messages.light,
         tone: 'good' as ThemeBadgeTone,
-        detail: '应用与系统均为浅色模式',
+        detail: messages.bothLight,
       }
     }
 
-    const appsLabel = themeState.apps === 'dark' ? '深色' : '浅色'
-    const systemLabel = themeState.system === 'dark' ? '深色' : '浅色'
+    const appsLabel = themeState.apps === 'dark' ? messages.dark : messages.light
+    const systemLabel = themeState.system === 'dark' ? messages.dark : messages.light
 
     return {
-      label: '混合',
+      label: messages.mixed,
       tone: 'mix' as ThemeBadgeTone,
-      detail: `应用：${appsLabel}｜系统：${systemLabel}`,
+      detail: messages.mixedDetail(appsLabel, systemLabel),
     }
-  }, [themeState])
+  }, [themeState, messages])
 
   const isDarkSelected = themeState?.apps === 'dark' && themeState?.system === 'dark'
   const isLightSelected =
     themeState?.apps === 'light' && themeState?.system === 'light'
 
   const uiTheme = themeState?.apps ?? 'dark'
+  const resolvedLanguageLabel = getLanguageOptionLabel(currentLanguage)
+  const resolvedLanguageDisplayName = getLanguageDisplayName(currentLanguage)
+  const languagePreference = languageSettings?.preference ?? 'auto'
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', uiTheme)
@@ -132,7 +196,7 @@ function App() {
         <header className="header">
           <div>
             <h1 className="title">WinLux</h1>
-            <p className="subtitle">一键切换 Windows 深色/浅色</p>
+            <p className="subtitle">{messages.subtitle}</p>
           </div>
 
           <span className={`badge badge-${currentTheme.tone}`}>{currentTheme.label}</span>
@@ -152,7 +216,7 @@ function App() {
               void updateTheme({ apps: 'dark', system: 'dark' })
             }}
           >
-            深色
+            {messages.dark}
           </button>
 
           <button
@@ -164,17 +228,18 @@ function App() {
               void updateTheme({ apps: 'light', system: 'light' })
             }}
           >
-            浅色
+            {messages.light}
           </button>
 
           <button
             type="button"
             className="btn btnGhost btnIcon"
             disabled={themeLoading}
-            aria-label="刷新状态"
-            title="刷新状态"
+            aria-label={messages.refreshStatus}
+            title={messages.refreshStatus}
             onClick={() => {
               void refreshTheme()
+              void refreshLanguage()
             }}
           >
             <svg
@@ -203,13 +268,41 @@ function App() {
           </button>
         </div>
 
-        <p className="hint">提示：关闭窗口不会退出，会隐藏到托盘。</p>
+        <div className="languageRow">
+          <label className="label" htmlFor="language-select">
+            {getLanguageMenuLabel(messages.language, currentLanguage)}
+          </label>
+          <select
+            id="language-select"
+            value={languagePreference}
+            disabled={languageLoading}
+            onChange={(event) => {
+              void updateLanguagePreference(event.target.value)
+            }}
+          >
+            <option value="auto">{messages.languageAuto}</option>
+            {(languageSettings?.available ?? []).map((language) => (
+              <option key={language} value={language}>
+                {getLanguageOptionLabel(language)}
+              </option>
+            ))}
+          </select>
+          <p className="hint">
+            {messages.effectiveLanguage}：
+            {resolvedLanguageDisplayName}
+            {' ('}
+            {resolvedLanguageLabel}
+            {')'}
+          </p>
+        </div>
+
+        <p className="hint">{messages.hideToTrayHint}</p>
 
         <details className="details">
-          <summary>更多信息</summary>
+          <summary>{messages.moreInfo}</summary>
           <div className="detailsBody">
             <div className="kv">
-              <span className="label">注册表路径</span>
+              <span className="label">{messages.registryPath}</span>
               <code className="code">{registryPath}</code>
             </div>
           </div>

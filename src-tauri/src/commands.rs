@@ -1,4 +1,4 @@
-use crate::models::{ThemeMode, ThemeState};
+use crate::models::{LanguageSettings, ThemeMode, ThemeState};
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
 use tauri::{AppHandle, Emitter, Manager};
@@ -52,7 +52,10 @@ pub fn get_theme_state() -> Result<ThemeState, String> {
 }
 
 #[tauri::command]
-pub fn set_theme_state(window: tauri::WebviewWindow, state: ThemeState) -> Result<ThemeState, String> {
+pub fn set_theme_state(
+    window: tauri::WebviewWindow,
+    state: ThemeState,
+) -> Result<ThemeState, String> {
     set_theme_state_for_app(&window.app_handle(), state)
 }
 
@@ -66,7 +69,11 @@ pub fn set_theme_state_for_app(app: &AppHandle, state: ThemeState) -> Result<The
         .map_err(|e| format!("打开注册表失败: {e}"))?;
 
     let apps_value: u32 = if state.apps == ThemeMode::Dark { 0 } else { 1 };
-    let system_value: u32 = if state.system == ThemeMode::Dark { 0 } else { 1 };
+    let system_value: u32 = if state.system == ThemeMode::Dark {
+        0
+    } else {
+        1
+    };
 
     key.set_value("AppsUseLightTheme", &apps_value)
         .map_err(|e| format!("写入 AppsUseLightTheme 失败: {e}"))?;
@@ -88,6 +95,32 @@ pub fn set_theme_state_for_app(app: &AppHandle, state: ThemeState) -> Result<The
 
     let _ = app.emit(THEME_STATE_CHANGED_EVENT, &next_state);
     Ok(next_state)
+}
+
+#[tauri::command]
+pub fn get_language_settings() -> Result<LanguageSettings, String> {
+    Ok(crate::i18n::get_language_settings())
+}
+
+pub fn set_language_preference_for_app(
+    app: &AppHandle,
+    preference: &str,
+) -> Result<LanguageSettings, String> {
+    crate::i18n::set_language_preference(preference)?;
+    let settings = crate::i18n::get_language_settings();
+
+    let _ = app.emit(crate::i18n::LANGUAGE_CHANGED_EVENT, &settings);
+    crate::tray::refresh_tray_language().map_err(|error| error.to_string())?;
+
+    Ok(settings)
+}
+
+#[tauri::command]
+pub fn set_language_preference(
+    app: AppHandle,
+    preference: String,
+) -> Result<LanguageSettings, String> {
+    set_language_preference_for_app(&app, &preference)
 }
 
 fn broadcast_theme_changed() {
