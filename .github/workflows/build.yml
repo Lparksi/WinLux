@@ -47,6 +47,13 @@ jobs:
       - name: Type Check
         run: bun run typecheck
 
+      - name: Ensure Frontend Dist Path
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'dist')) {
+            New-Item -ItemType Directory -Path 'dist' | Out-Null
+          }
+
       - name: Rust Tests
         run: cargo test -p winlux
 
