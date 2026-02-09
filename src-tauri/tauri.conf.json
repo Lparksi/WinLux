@@ -27,7 +27,46 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": "nsis",
+    "windows": {
+      "nsis": {
+        "languages": [
+          "English",
+          "SimpChinese",
+          "TradChinese",
+          "Japanese",
+          "Korean",
+          "Thai",
+          "Vietnamese",
+          "Indonesian",
+          "French",
+          "German",
+          "Italian",
+          "Spanish",
+          "SpanishInternational",
+          "Portuguese",
+          "PortugueseBR",
+          "Russian",
+          "Polish",
+          "Turkish",
+          "Ukrainian",
+          "Czech",
+          "Hungarian",
+          "Greek",
+          "Bulgarian",
+          "Romanian",
+          "Arabic",
+          "Dutch",
+          "Danish",
+          "Finnish",
+          "Norwegian",
+          "Swedish"
+        ],
+        "displayLanguageSelector": true
+      }
+    },
+    "license": "MIT",
+    "licenseFile": "../LICENSE",
     "icon": [
       "icons/icon.ico",
       "icons/StoreLogo.png",
