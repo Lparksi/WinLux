@@ -9,8 +9,8 @@ use std::process::Command;
 use std::sync::OnceLock;
 use std::time::Duration;
 use tauri::{AppHandle, Emitter, Manager};
-use tokio::sync::Mutex;
-use tokio::time::{sleep, Instant};
+use tokio::sync::{Mutex, Notify};
+use tokio::time::{sleep, timeout, Instant};
 
 pub const THEME_STATE_CHANGED_EVENT: &str = "theme-state-changed";
 pub const SOLAR_SETTINGS_CHANGED_EVENT: &str = "solar-settings-changed";
@@ -26,10 +26,13 @@ const NOMINATIM_SEARCH_URL: &str = "https://nominatim.openstreetmap.org/search";
 const NOMINATIM_USER_AGENT: &str =
     concat!("WinLux/", env!("CARGO_PKG_VERSION"), " (+https://github.com/Lparksi/WinLux)");
 const NOMINATIM_MIN_INTERVAL: Duration = Duration::from_secs(1);
-const AUTO_THEME_CHECK_INTERVAL: Duration = Duration::from_secs(60);
+const AUTO_THEME_IDLE_CHECK_INTERVAL: Duration = Duration::from_secs(10 * 60);
+const AUTO_THEME_ERROR_RETRY_INTERVAL: Duration = Duration::from_secs(60);
+const AUTO_THEME_MIN_RECHECK_INTERVAL: Duration = Duration::from_secs(1);
 
 static NOMINATIM_RATE_LIMITER: OnceLock<Mutex<Option<Instant>>> = OnceLock::new();
 static AUTO_THEME_WORKER_STARTED: OnceLock<()> = OnceLock::new();
+static AUTO_THEME_WAKE_SIGNAL: OnceLock<Notify> = OnceLock::new();
 
 #[derive(Debug, Deserialize)]
 struct NominatimItem {
@@ -61,10 +64,17 @@ pub fn start_auto_theme_worker(app: AppHandle) {
         return;
     }
 
+    let wake_signal = AUTO_THEME_WAKE_SIGNAL.get_or_init(Notify::new);
+
     tauri::async_runtime::spawn(async move {
         loop {
-            let _ = apply_auto_theme_for_app(&app);
-            sleep(AUTO_THEME_CHECK_INTERVAL).await;
+            let wait_duration =
+                match apply_auto_theme_for_app_and_get_wait_duration(&app) {
+                    Ok(duration) => duration,
+                    Err(_) => AUTO_THEME_ERROR_RETRY_INTERVAL,
+                };
+
+            let _ = timeout(wait_duration, wake_signal.notified()).await;
         }
     });
 }
@@ -143,9 +153,14 @@ pub fn set_theme_state_for_app(app: &AppHandle, state: ThemeState) -> Result<The
 }
 
 pub fn apply_auto_theme_for_app(app: &AppHandle) -> Result<(), String> {
+    let _ = apply_auto_theme_for_app_and_get_wait_duration(app)?;
+    Ok(())
+}
+
+fn apply_auto_theme_for_app_and_get_wait_duration(app: &AppHandle) -> Result<Duration, String> {
     let settings = get_solar_settings_internal()?;
     if !settings.auto_theme_enabled {
-        return Ok(());
+        return Ok(AUTO_THEME_IDLE_CHECK_INTERVAL);
     }
 
     let location = settings
@@ -165,7 +180,18 @@ pub fn apply_auto_theme_for_app(app: &AppHandle) -> Result<(), String> {
         let _ = set_theme_state_for_app(app, desired_state)?;
     }
 
-    Ok(())
+    let seconds_until_next_transition =
+        sun_times.seconds_until_next_transition.max(0) as u64;
+    let wait_duration = Duration::from_secs(seconds_until_next_transition.saturating_add(1))
+        .max(AUTO_THEME_MIN_RECHECK_INTERVAL);
+
+    Ok(wait_duration)
+}
+
+fn notify_auto_theme_worker() {
+    if let Some(signal) = AUTO_THEME_WAKE_SIGNAL.get() {
+        signal.notify_one();
+    }
 }
 
 #[tauri::command]
@@ -230,6 +256,7 @@ pub async fn save_solar_location(app: AppHandle, address: String) -> Result<Sola
     }
 
     let _ = app.emit(SOLAR_SETTINGS_CHANGED_EVENT, &settings);
+    notify_auto_theme_worker();
     Ok(settings)
 }
 
@@ -250,6 +277,7 @@ pub fn set_auto_theme_enabled(app: AppHandle, enabled: bool) -> Result<SolarSett
 
     let settings = get_solar_settings_internal()?;
     let _ = app.emit(SOLAR_SETTINGS_CHANGED_EVENT, &settings);
+    notify_auto_theme_worker();
     Ok(settings)
 }
 
