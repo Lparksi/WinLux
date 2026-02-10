@@ -4,47 +4,67 @@
 Var WinLuxStartupCheckbox
 Var WinLuxStartupCheckboxState
 
-!macro NSIS_HOOK_PREINSTALL
+Function WinLuxInstallerPageShow
+  StrCpy $WinLuxStartupCheckbox ""
   StrCpy $WinLuxStartupCheckboxState 0
 
-  nsDialogs::Create 1018
-  Pop $0
-  ${If} $0 == error
+  ${NSD_CreateCheckbox} 120u 145u 195u 10u "$(startupEnableOption)"
+  Pop $WinLuxStartupCheckbox
+
+  ${If} $WinLuxStartupCheckbox == error
     Return
   ${EndIf}
 
-  ${NSD_CreateLabel} 0 0 100% 20u "$(startupQuestion)"
-  Pop $1
+  ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${PRODUCTNAME}"
+  ${If} $0 != ""
+    ${NSD_Check} $WinLuxStartupCheckbox
+  ${EndIf}
+FunctionEnd
 
-  ${NSD_CreateCheckbox} 0 24u 100% 12u "$(startupEnableOption)"
-  Pop $WinLuxStartupCheckbox
-
-  StrCpy $WinLuxStartupCheckboxState 0
-
-  nsDialogs::Show
+Function WinLuxInstallerPageLeave
+  ${If} $WinLuxStartupCheckbox == ""
+    Return
+  ${EndIf}
 
   ${NSD_GetState} $WinLuxStartupCheckbox $WinLuxStartupCheckboxState
-!macroend
-
-!macro NSIS_HOOK_POSTINSTALL
   ${If} $WinLuxStartupCheckboxState = 1
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${PRODUCTNAME}" "$\"$INSTDIR\${MAINBINARYNAME}.exe$\" --startup"
   ${Else}
     DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${PRODUCTNAME}"
   ${EndIf}
+FunctionEnd
+
+!macro NSIS_HOOK_POSTINSTALL
+  ; Startup state is handled on the finish page leave event.
 !macroend
 
-LangString startupQuestion ${LANG_ENGLISH} "Startup Option"
-LangString startupEnableOption ${LANG_ENGLISH} "Enable Run at Startup"
-
-LangString startupQuestion ${LANG_SIMPCHINESE} "启动选项"
-LangString startupEnableOption ${LANG_SIMPCHINESE} "允许开机自启"
-
-LangString startupQuestion ${LANG_TRADCHINESE} "啟動選項"
-LangString startupEnableOption ${LANG_TRADCHINESE} "允許開機自啟"
-
-LangString startupQuestion ${LANG_JAPANESE} "起動オプション"
-LangString startupEnableOption ${LANG_JAPANESE} "スタートアップで実行を有効にする"
-
-LangString startupQuestion ${LANG_KOREAN} "시작 옵션"
-LangString startupEnableOption ${LANG_KOREAN} "시작 시 자동 실행 허용"
+LangString startupEnableOption 1033 "Enable run at startup"
+LangString startupEnableOption 2052 "允许开机自启"
+LangString startupEnableOption 1028 "允許開機自啟"
+LangString startupEnableOption 1041 "スタートアップで実行を有効にする"
+LangString startupEnableOption 1042 "시작 시 자동 실행 허용"
+LangString startupEnableOption 1054 "เปิดใช้งานเมื่อเริ่มระบบ"
+LangString startupEnableOption 1066 "Bật chạy cùng Windows"
+LangString startupEnableOption 1057 "Aktifkan jalankan saat startup"
+LangString startupEnableOption 1036 "Activer l'exécution au démarrage"
+LangString startupEnableOption 1031 "Beim Start ausführen aktivieren"
+LangString startupEnableOption 1040 "Abilita esecuzione all'avvio"
+LangString startupEnableOption 1034 "Habilitar ejecución al iniciar"
+LangString startupEnableOption 3082 "Habilitar ejecución al iniciar"
+LangString startupEnableOption 2070 "Ativar execução no arranque"
+LangString startupEnableOption 1046 "Ativar execução na inicialização"
+LangString startupEnableOption 1049 "Включить автозапуск"
+LangString startupEnableOption 1045 "Włącz uruchamianie przy starcie"
+LangString startupEnableOption 1055 "Başlangıçta çalıştırmayı etkinleştir"
+LangString startupEnableOption 1058 "Увімкнути запуск під час старту"
+LangString startupEnableOption 1029 "Povolit spuštění při startu"
+LangString startupEnableOption 1038 "Futtatás engedélyezése indításkor"
+LangString startupEnableOption 1032 "Ενεργοποίηση εκτέλεσης κατά την εκκίνηση"
+LangString startupEnableOption 1026 "Активирай стартиране при включване"
+LangString startupEnableOption 1048 "Activează rularea la pornire"
+LangString startupEnableOption 1025 "تمكين التشغيل عند بدء التشغيل"
+LangString startupEnableOption 1043 "Automatisch starten inschakelen"
+LangString startupEnableOption 1030 "Aktivér kørsel ved opstart"
+LangString startupEnableOption 1035 "Ota käynnistys ajon yhteydessä käyttöön"
+LangString startupEnableOption 1044 "Aktiver kjøring ved oppstart"
+LangString startupEnableOption 1053 "Aktivera körning vid uppstart"

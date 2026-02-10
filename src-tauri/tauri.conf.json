@@ -30,6 +30,7 @@
     "targets": "nsis",
     "windows": {
       "nsis": {
+        "template": "./nsis/installer-template.nsi",
         "installerHooks": "./nsis/installer-hooks.nsh",
         "languages": [
           "English",
