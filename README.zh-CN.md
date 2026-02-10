@@ -3,7 +3,7 @@
 [English](./README.md) | 简体中文 | [日本語](./README.ja.md) | [한국어](./README.ko.md)
 
 WinLux 是一个基于 Tauri 2 + React 的轻量级 Windows 桌面工具。
-它可以快速切换 Windows 深色/浅色主题，常驻系统托盘，管理应用语言偏好，并支持日出/日落自动主题切换。
+它可以快速切换 Windows 深色/浅色主题，常驻系统托盘，并支持日出/日落自动主题切换。
 
 ## 目录
 
