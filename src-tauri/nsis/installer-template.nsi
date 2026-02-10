@@ -32,7 +32,9 @@ ${StrLoc}
 !define WEBVIEW2APPGUID "{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
 
 !define MANUFACTURER "{{manufacturer}}"
-!define PRODUCTNAME "{{product_name}}"
+!ifndef PRODUCTNAME
+  !define PRODUCTNAME "{{product_name}}"
+!endif
 !define VERSION "{{version}}"
 !define VERSIONWITHBUILD "{{version_with_build}}"
 !define HOMEPAGE "{{homepage}}"
@@ -41,7 +43,9 @@ ${StrLoc}
 !define INSTALLERICON "{{installer_icon}}"
 !define SIDEBARIMAGE "{{sidebar_image}}"
 !define HEADERIMAGE "{{header_image}}"
-!define MAINBINARYNAME "{{main_binary_name}}"
+!ifndef MAINBINARYNAME
+  !define MAINBINARYNAME "{{main_binary_name}}"
+!endif
 !define MAINBINARYSRCPATH "{{main_binary_path}}"
 !define BUNDLEID "{{bundle_id}}"
 !define COPYRIGHT "{{copyright}}"
