@@ -97,10 +97,7 @@ cargo test -p winlux
 
 ## 语言说明
 
-- 当前前端界面文案已提供：
-  - 英文
-  - 简体中文
-  - 繁體中文
+- 主窗口界面文案已覆盖上述 30 种语言选项。
 - 托盘与安装器语言选项覆盖 30 个安装器语言标识。
 - 语言偏好存储位置：
   - `HKCU\Software\WinLux\LanguagePreference`

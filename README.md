@@ -97,11 +97,9 @@ cargo test -p winlux
 
 ## Language Notes
 
-- Current frontend UI strings are localized for:
-  - English
-  - Simplified Chinese
-  - Traditional Chinese
-- Tray and installer language options cover 30 installer language identifiers.
+- Supported language options (30):
+  - English, Simplified Chinese, Traditional Chinese, Japanese, Korean, Thai, Vietnamese, Indonesian, French, German, Italian, Spanish (Spain), Spanish (International), Portuguese (Portugal), Portuguese (Brazil), Russian, Polish, Turkish, Ukrainian, Czech, Hungarian, Greek, Bulgarian, Romanian, Arabic, Dutch, Danish, Finnish, Norwegian, Swedish
+- Main-window UI strings are localized for all supported language options above.
 - Language preference is stored at:
   - `HKCU\Software\WinLux\LanguagePreference`
 

@@ -288,7 +288,7 @@ function App() {
             ))}
           </select>
           <p className="hint">
-            {messages.effectiveLanguage}：
+            {messages.effectiveLanguage}: 
             {resolvedLanguageDisplayName}
             {' ('}
             {resolvedLanguageLabel}
