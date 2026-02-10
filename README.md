@@ -16,6 +16,7 @@ It lets you quickly switch Windows light/dark themes, stay in the system tray, m
 - [Validation](#validation)
 - [Project Structure](#project-structure)
 - [Sunrise/Sunset Auto Theme Notes](#sunrisesunset-auto-theme-notes)
+- [OpenStreetMap Attribution](#openstreetmap-attribution)
 - [Language Notes](#language-notes)
 - [License](#license)
 
@@ -33,7 +34,7 @@ It lets you quickly switch Windows light/dark themes, stay in the system tray, m
 - Close-to-tray behavior (closing the window hides it instead of exiting).
 - Language preference support (`auto` follow-system or manual selection).
 - Sunrise/Sunset settings panel:
-  - Resolve address to coordinates (OpenStreetMap Nominatim)
+  - Resolve address to coordinates for Sunrise/Sunset Auto Theme setup (OpenStreetMap Nominatim)
   - Save a location and query sunrise/sunset for a target date
   - Automatically switch Apps/System theme by local sunrise/sunset transitions
 - NSIS installer language selection with 30 language options.
@@ -116,6 +117,12 @@ cargo test -p winlux
   - `HKCU\Software\WinLux\SolarLatitude`
   - `HKCU\Software\WinLux\SolarLongitude`
   - `HKCU\Software\WinLux\SolarAutoThemeEnabled`
+
+## OpenStreetMap Attribution
+
+- WinLux uses OpenStreetMap Nominatim (`https://nominatim.openstreetmap.org/search`) to convert user-entered addresses into coordinates for the Sunrise/Sunset Auto Theme feature.
+- Geocoding data is © OpenStreetMap contributors, licensed under ODbL 1.0.
+- Copyright and license details: `https://www.openstreetmap.org/copyright`
 
 ## Language Notes
 

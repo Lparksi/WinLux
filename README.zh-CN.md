@@ -16,6 +16,7 @@ WinLux 是一个基于 Tauri 2 + React 的轻量级 Windows 桌面工具。
 - [验证建议](#验证建议)
 - [项目结构](#项目结构)
 - [日出/日落自动主题说明](#日出日落自动主题说明)
+- [OpenStreetMap 版权与归属说明](#openstreetmap-版权与归属说明)
 - [语言说明](#语言说明)
 - [许可证](#许可证)
 
@@ -33,7 +34,7 @@ WinLux 是一个基于 Tauri 2 + React 的轻量级 Windows 桌面工具。
 - 关闭窗口不退出（隐藏到托盘）。
 - 支持语言偏好（`auto` 跟随系统或手动选择）。
 - 日出/日落设置面板：
-  - 地址解析为坐标（OpenStreetMap Nominatim）
+  - 为日出/日落自动主题配置将地址解析为坐标（OpenStreetMap Nominatim）
   - 保存地点并查询指定日期的日出/日落
   - 按本地日出/日落时刻自动切换 Apps/System 主题
 - NSIS 安装器支持 30 种语言选择。
@@ -116,6 +117,12 @@ cargo test -p winlux
   - `HKCU\Software\WinLux\SolarLatitude`
   - `HKCU\Software\WinLux\SolarLongitude`
   - `HKCU\Software\WinLux\SolarAutoThemeEnabled`
+
+## OpenStreetMap 版权与归属说明
+
+- WinLux 使用 OpenStreetMap Nominatim（ https://nominatim.openstreetmap.org/search ） 将用户输入地址转换为经纬度，用于日出/日落自动主题功能。
+- 地理编码数据版权归 © OpenStreetMap contributors，采用 ODbL 1.0 许可。
+- 版权与许可详情：`https://www.openstreetmap.org/copyright`
 
 ## 语言说明
 

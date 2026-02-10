@@ -16,6 +16,7 @@ Windows のライト/ダークテーマをすばやく切り替え、システ�
 - [検証](#検証)
 - [プロジェクト構成](#プロジェクト構成)
 - [日の出/日没 自動テーマメモ](#日の出日没-自動テーマメモ)
+- [OpenStreetMap の帰属表記](#openstreetmap-の帰属表記)
 - [言語メモ](#言語メモ)
 - [ライセンス](#ライセンス)
 
@@ -33,7 +34,7 @@ Windows のライト/ダークテーマをすばやく切り替え、システ�
 - ウィンドウを閉じても終了せず、トレイへ最小化。
 - 言語設定をサポート（`auto` でシステム追従、または手動選択）。
 - 日の出/日没 設定パネル:
-  - 住所を座標へ解決（OpenStreetMap Nominatim）
+  - 日の出/日没 自動テーマ設定のために住所を座標へ解決（OpenStreetMap Nominatim）
   - 保存した地点で指定日の日の出/日没を取得
   - ローカル日の出/日没時刻に基づき Apps/System テーマを自動切り替え
 - NSIS インストーラーで 30 言語を選択可能。
@@ -116,6 +117,12 @@ cargo test -p winlux
   - `HKCU\Software\WinLux\SolarLatitude`
   - `HKCU\Software\WinLux\SolarLongitude`
   - `HKCU\Software\WinLux\SolarAutoThemeEnabled`
+
+## OpenStreetMap の帰属表記
+
+- WinLux は OpenStreetMap Nominatim（ `https://nominatim.openstreetmap.org/search` ）を使用し、ユーザーが入力した住所を緯度経度へ変換して、日の出/日没 自動テーマ機能に利用します。
+- ジオコーディングデータの著作権は © OpenStreetMap contributors に帰属し、ODbL 1.0 ライセンスで提供されています。
+- 著作権とライセンスの詳細: `https://www.openstreetmap.org/copyright`
 
 ## 言語メモ
 
