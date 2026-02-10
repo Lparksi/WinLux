@@ -1,9 +1,9 @@
 # WinLux
 
-[简体中文](./README.zh-CN.md)
+English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md) | [한국어](./README.ko.md)
 
 WinLux is a lightweight, Windows-only desktop utility built with Tauri 2 + React.
-It lets you quickly switch Windows light/dark themes, stay in the system tray, and manage app language preferences.
+It lets you quickly switch Windows light/dark themes, stay in the system tray, manage app language preferences, and use Sunrise/Sunset Auto Theme Switching.
 
 ## Table of Contents
 
@@ -15,6 +15,7 @@ It lets you quickly switch Windows light/dark themes, stay in the system tray, a
 - [Scripts](#scripts)
 - [Validation](#validation)
 - [Project Structure](#project-structure)
+- [Sunrise/Sunset Auto Theme Notes](#sunrisesunset-auto-theme-notes)
 - [Language Notes](#language-notes)
 - [License](#license)
 
@@ -26,10 +27,15 @@ It lets you quickly switch Windows light/dark themes, stay in the system tray, a
 - System tray support:
   - Open main window
   - Quick switch to dark/light mode
+  - Toggle Sunrise/Sunset Auto Theme
   - Change language preference
   - Quit app
 - Close-to-tray behavior (closing the window hides it instead of exiting).
 - Language preference support (`auto` follow-system or manual selection).
+- Sunrise/Sunset settings panel:
+  - Resolve address to coordinates (OpenStreetMap Nominatim)
+  - Save a location and query sunrise/sunset for a target date
+  - Automatically switch Apps/System theme by local sunrise/sunset transitions
 - NSIS installer language selection with 30 language options.
 
 ## Screenshots
@@ -43,7 +49,7 @@ It lets you quickly switch Windows light/dark themes, stay in the system tray, a
 
 - Frontend: React 18 + TypeScript + Vite
 - Desktop runtime: Tauri 2
-- Backend: Rust + `winreg`
+- Backend: Rust + `winreg` + `reqwest` + `sunrise` + `tokio`
 - Package manager: Bun
 
 ## Requirements
@@ -52,6 +58,7 @@ It lets you quickly switch Windows light/dark themes, stay in the system tray, a
 - Bun (recommended latest stable)
 - Rust stable toolchain (MSVC target)
 - Tauri prerequisites for Windows (WebView2 / build tools)
+- Internet access (only required for address geocoding via OpenStreetMap Nominatim)
 
 ## Quick Start
 
@@ -95,6 +102,20 @@ cargo test -p winlux
 ├─ scripts/             # Build/release helper scripts
 └─ dist/                # Frontend output consumed by Tauri builds
 ```
+
+## Sunrise/Sunset Auto Theme Notes
+
+- Geocoding endpoint:
+  - `https://nominatim.openstreetmap.org/search`
+- Sunrise/Sunset Auto Theme worker:
+  - Runs in the background and applies light/dark based on local sunrise/sunset at saved coordinates.
+  - If Sunrise/Sunset Auto Theme is enabled but no location is saved, the app reports a configuration-required error.
+- Settings stored in:
+  - `HKCU\Software\WinLux\SolarAddress`
+  - `HKCU\Software\WinLux\SolarDisplayName`
+  - `HKCU\Software\WinLux\SolarLatitude`
+  - `HKCU\Software\WinLux\SolarLongitude`
+  - `HKCU\Software\WinLux\SolarAutoThemeEnabled`
 
 ## Language Notes
 
