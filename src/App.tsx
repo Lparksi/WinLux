@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { listen } from '@tauri-apps/api/event'
 import {
   AUTO_THEME_CONFIGURATION_REQUIRED_EVENT,
+  AppErrorPayload,
   geocodeAddress,
   GeocodeResult,
   getSolarSettings,
@@ -31,6 +32,33 @@ import {
 } from './lib/i18n'
 
 type ThemeBadgeTone = 'neutral' | 'good' | 'mix'
+
+const toErrorMessage = (error: unknown, language: string): string => {
+  if (typeof error === 'string') {
+    try {
+      const parsed = JSON.parse(error) as AppErrorPayload
+      if (typeof parsed?.code === 'string') {
+        return translate(language, parsed.code, parsed.params)
+      }
+    } catch {
+      return error
+    }
+
+    return error
+  }
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof (error as { code?: unknown }).code === 'string'
+  ) {
+    const payload = error as AppErrorPayload
+    return translate(language, payload.code, payload.params)
+  }
+
+  return error instanceof Error ? error.message : String(error)
+}
 
 const formatDuration = (totalSeconds: number) => {
   const safeSeconds = Math.max(0, Math.floor(totalSeconds))
@@ -67,6 +95,7 @@ function App() {
   const [solarSettings, setSolarSettings] = useState<SolarSettings | null>(null)
   const [todaySunTimes, setTodaySunTimes] = useState<SunTimesResult | null>(null)
   const [todaySunTimesLoading, setTodaySunTimesLoading] = useState(false)
+  const currentLanguage = languageSettings?.resolved ?? 'English'
 
   const registryPath =
     'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize'
@@ -78,7 +107,7 @@ function App() {
       const state = await getThemeState()
       setThemeStateLocal(state)
     } catch (error) {
-      setThemeError(error instanceof Error ? error.message : String(error))
+      setThemeError(toErrorMessage(error, currentLanguage))
     } finally {
       setThemeLoading(false)
     }
@@ -91,7 +120,7 @@ function App() {
       const settings = await getLanguageSettings()
       setLanguageSettings(settings)
     } catch (error) {
-      setThemeError(error instanceof Error ? error.message : String(error))
+      setThemeError(toErrorMessage(error, currentLanguage))
     } finally {
       setLanguageLoading(false)
     }
@@ -148,8 +177,8 @@ function App() {
   useEffect(() => {
     let unlisten: (() => void) | undefined
 
-    void listen<string>(AUTO_THEME_CONFIGURATION_REQUIRED_EVENT, (event) => {
-      setSolarError(event.payload)
+    void listen<AppErrorPayload>(AUTO_THEME_CONFIGURATION_REQUIRED_EVENT, (event) => {
+      setSolarError(toErrorMessage(event.payload, currentLanguage))
       setSolarSettingsLoading(false)
       setAutoThemeToggling(false)
       void refreshSolarSettings()
@@ -162,7 +191,7 @@ function App() {
         unlisten()
       }
     }
-  }, [])
+  }, [currentLanguage])
 
   useEffect(() => {
     let unlisten: (() => void) | undefined
@@ -207,7 +236,7 @@ function App() {
       const settings = await setLanguagePreference(preference)
       setLanguageSettings(settings)
     } catch (error) {
-      setThemeError(error instanceof Error ? error.message : String(error))
+      setThemeError(toErrorMessage(error, currentLanguage))
     } finally {
       setLanguageLoading(false)
     }
@@ -220,7 +249,7 @@ function App() {
       const result = await geocodeAddress(addressInput)
       setGeocodeResult(result)
     } catch (error) {
-      setSolarError(error instanceof Error ? error.message : String(error))
+      setSolarError(toErrorMessage(error, currentLanguage))
     } finally {
       setGeocodeLoading(false)
     }
@@ -238,7 +267,7 @@ function App() {
         setAddressInput(settings.location.address)
       }
     } catch (error) {
-      setSolarError(error instanceof Error ? error.message : String(error))
+      setSolarError(toErrorMessage(error, currentLanguage))
     } finally {
       setGeocodeLoading(false)
     }
@@ -275,7 +304,7 @@ function App() {
         setAddressInput(settings.location.address)
       }
     } catch (error) {
-      setSolarError(error instanceof Error ? error.message : String(error))
+      setSolarError(toErrorMessage(error, currentLanguage))
     } finally {
       setSolarSettingsLoading(false)
     }
@@ -294,7 +323,7 @@ function App() {
         longitude: result.longitude,
       })
     } catch (error) {
-      setSolarError(error instanceof Error ? error.message : String(error))
+      setSolarError(toErrorMessage(error, currentLanguage))
     } finally {
       setSunLoading(false)
     }
@@ -313,7 +342,7 @@ function App() {
         longitude: result.longitude,
       })
     } catch (error) {
-      setSolarError(error instanceof Error ? error.message : String(error))
+      setSolarError(toErrorMessage(error, currentLanguage))
     } finally {
       setSunLoading(false)
     }
@@ -326,7 +355,7 @@ function App() {
       const settings = await setAutoThemeEnabled(enabled)
       setSolarSettings(settings)
     } catch (error) {
-      setSolarError(error instanceof Error ? error.message : String(error))
+      setSolarError(toErrorMessage(error, currentLanguage))
     } finally {
       setAutoThemeToggling(false)
     }
@@ -337,11 +366,10 @@ function App() {
     try {
       await openExternalUrl('https://www.openstreetmap.org/copyright')
     } catch (error) {
-      setSolarError(error instanceof Error ? error.message : String(error))
+      setSolarError(toErrorMessage(error, currentLanguage))
     }
   }
 
-  const currentLanguage = languageSettings?.resolved ?? 'English'
   const messages = useMemo(() => getMessages(currentLanguage), [currentLanguage])
 
   const updateTheme = async (next: ThemeState) => {
@@ -351,7 +379,7 @@ function App() {
       const state = await setThemeState(next)
       setThemeStateLocal(state)
     } catch (error) {
-      setThemeError(error instanceof Error ? error.message : String(error))
+      setThemeError(toErrorMessage(error, currentLanguage))
     } finally {
       setThemeLoading(false)
     }

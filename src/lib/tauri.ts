@@ -11,6 +11,11 @@ export interface LanguageSettings {
   available: string[]
 }
 
+export interface AppErrorPayload {
+  code: string
+  params?: Record<string, string>
+}
+
 export interface GeocodeResult {
   address: string
   display_name: string

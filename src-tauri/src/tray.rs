@@ -1,5 +1,5 @@
 use crate::i18n;
-use crate::models::{ThemeMode, ThemeState};
+use crate::models::{AppError, ThemeMode, ThemeState};
 use std::sync::{Mutex, OnceLock};
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::tray::TrayIconBuilder;
@@ -320,8 +320,7 @@ pub fn setup_tray(app: &AppHandle) -> Result<()> {
 
                     if settings.location.is_none() {
                         open_main_window(app);
-                        let language = i18n::get_language_settings().resolved;
-                        let message = i18n::auto_theme_configuration_required_message(&language);
+                        let message = AppError::new("errors.auto_theme_configuration_required");
                         let _ = app.emit(
                             crate::commands::AUTO_THEME_CONFIGURATION_REQUIRED_EVENT,
                             &message,

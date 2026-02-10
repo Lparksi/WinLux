@@ -1,5 +1,6 @@
 use crate::models::{
-    GeocodeResult, LanguageSettings, SolarSettings, SunTimesResult, ThemeMode, ThemeState,
+    AppError, AppResult, GeocodeResult, LanguageSettings, SolarSettings, SunTimesResult,
+    ThemeMode, ThemeState,
 };
 use chrono::{DateTime, Datelike, Local, NaiveDate, Utc};
 use serde::Deserialize;
@@ -33,6 +34,14 @@ const AUTO_THEME_MIN_RECHECK_INTERVAL: Duration = Duration::from_secs(1);
 static NOMINATIM_RATE_LIMITER: OnceLock<Mutex<Option<Instant>>> = OnceLock::new();
 static AUTO_THEME_WORKER_STARTED: OnceLock<()> = OnceLock::new();
 static AUTO_THEME_WAKE_SIGNAL: OnceLock<Notify> = OnceLock::new();
+
+fn err(code: &str) -> AppError {
+    AppError::new(code)
+}
+
+fn err_with_source(code: &str, source: impl ToString) -> AppError {
+    AppError::new(code).with_param("source", source.to_string())
+}
 
 #[derive(Debug, Deserialize)]
 struct NominatimItem {
@@ -80,14 +89,14 @@ pub fn start_auto_theme_worker(app: AppHandle) {
 }
 
 #[tauri::command]
-pub fn get_theme_state() -> Result<ThemeState, String> {
+pub fn get_theme_state() -> AppResult<ThemeState> {
     use winreg::enums::{HKEY_CURRENT_USER, KEY_READ};
     use winreg::RegKey;
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let key = hkcu
         .open_subkey_with_flags(PERSONALIZE_KEY, KEY_READ)
-        .map_err(|e| format!("打开注册表失败: {e}"))?;
+        .map_err(|error| err_with_source("errors.registry.open_failed", error))?;
 
     let apps_value: u32 = key.get_value("AppsUseLightTheme").unwrap_or(1);
     let system_value: u32 = key.get_value("SystemUsesLightTheme").unwrap_or(1);
@@ -110,18 +119,18 @@ pub fn get_theme_state() -> Result<ThemeState, String> {
 pub fn set_theme_state(
     window: tauri::WebviewWindow,
     state: ThemeState,
-) -> Result<ThemeState, String> {
+) -> AppResult<ThemeState> {
     set_theme_state_for_app(&window.app_handle(), state)
 }
 
-pub fn set_theme_state_for_app(app: &AppHandle, state: ThemeState) -> Result<ThemeState, String> {
+pub fn set_theme_state_for_app(app: &AppHandle, state: ThemeState) -> AppResult<ThemeState> {
     use winreg::enums::{HKEY_CURRENT_USER, KEY_SET_VALUE};
     use winreg::RegKey;
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let key = hkcu
         .open_subkey_with_flags(PERSONALIZE_KEY, KEY_SET_VALUE)
-        .map_err(|e| format!("打开注册表失败: {e}"))?;
+        .map_err(|error| err_with_source("errors.registry.open_failed", error))?;
 
     let apps_value: u32 = if state.apps == ThemeMode::Dark { 0 } else { 1 };
     let system_value: u32 = if state.system == ThemeMode::Dark {
@@ -131,9 +140,9 @@ pub fn set_theme_state_for_app(app: &AppHandle, state: ThemeState) -> Result<The
     };
 
     key.set_value("AppsUseLightTheme", &apps_value)
-        .map_err(|e| format!("写入 AppsUseLightTheme 失败: {e}"))?;
+        .map_err(|error| err_with_source("errors.registry.write_apps_theme_failed", error))?;
     key.set_value("SystemUsesLightTheme", &system_value)
-        .map_err(|e| format!("写入 SystemUsesLightTheme 失败: {e}"))?;
+        .map_err(|error| err_with_source("errors.registry.write_system_theme_failed", error))?;
 
     broadcast_theme_changed();
     let next_state = get_theme_state()?;
@@ -152,12 +161,12 @@ pub fn set_theme_state_for_app(app: &AppHandle, state: ThemeState) -> Result<The
     Ok(next_state)
 }
 
-pub fn apply_auto_theme_for_app(app: &AppHandle) -> Result<(), String> {
+pub fn apply_auto_theme_for_app(app: &AppHandle) -> AppResult<()> {
     let _ = apply_auto_theme_for_app_and_get_wait_duration(app)?;
     Ok(())
 }
 
-fn apply_auto_theme_for_app_and_get_wait_duration(app: &AppHandle) -> Result<Duration, String> {
+fn apply_auto_theme_for_app_and_get_wait_duration(app: &AppHandle) -> AppResult<Duration> {
     let settings = get_solar_settings_internal()?;
     if !settings.auto_theme_enabled {
         return Ok(AUTO_THEME_IDLE_CHECK_INTERVAL);
@@ -165,7 +174,7 @@ fn apply_auto_theme_for_app_and_get_wait_duration(app: &AppHandle) -> Result<Dur
 
     let location = settings
         .location
-        .ok_or_else(|| "自动切换已启用，但尚未保存地址".to_string())?;
+        .ok_or_else(|| err("errors.auto_theme.location_not_saved"))?;
     let now_local = Local::now();
     let local_date = now_local.date_naive();
     let sun_times = build_sun_times_result(location, local_date, now_local)?;
@@ -195,19 +204,20 @@ fn notify_auto_theme_worker() {
 }
 
 #[tauri::command]
-pub fn get_language_settings() -> Result<LanguageSettings, String> {
+pub fn get_language_settings() -> AppResult<LanguageSettings> {
     Ok(crate::i18n::get_language_settings())
 }
 
 pub fn set_language_preference_for_app(
     app: &AppHandle,
     preference: &str,
-) -> Result<LanguageSettings, String> {
+) -> AppResult<LanguageSettings> {
     crate::i18n::set_language_preference(preference)?;
     let settings = crate::i18n::get_language_settings();
 
     let _ = app.emit(crate::i18n::LANGUAGE_CHANGED_EVENT, &settings);
-    crate::tray::refresh_tray_language().map_err(|error| error.to_string())?;
+    crate::tray::refresh_tray_language()
+        .map_err(|error| err_with_source("errors.tray.refresh_language_failed", error))?;
 
     Ok(settings)
 }
@@ -216,37 +226,37 @@ pub fn set_language_preference_for_app(
 pub fn set_language_preference(
     app: AppHandle,
     preference: String,
-) -> Result<LanguageSettings, String> {
+) -> AppResult<LanguageSettings> {
     set_language_preference_for_app(&app, &preference)
 }
 
 #[tauri::command]
-pub fn open_external_url(url: String) -> Result<(), String> {
+pub fn open_external_url(url: String) -> AppResult<()> {
     let trimmed = url.trim();
     if !(trimmed.starts_with("https://") || trimmed.starts_with("http://")) {
-        return Err("仅支持 http/https 链接".to_string());
+        return Err(err("errors.url.scheme_not_supported"));
     }
 
     Command::new("cmd")
         .args(["/C", "start", "", trimmed])
         .spawn()
-        .map_err(|error| format!("打开浏览器失败: {error}"))?;
+        .map_err(|error| err_with_source("errors.browser.open_failed", error))?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub async fn geocode_address(address: String) -> Result<GeocodeResult, String> {
+pub async fn geocode_address(address: String) -> AppResult<GeocodeResult> {
     geocode_address_internal(&address).await
 }
 
 #[tauri::command]
-pub fn get_solar_settings() -> Result<SolarSettings, String> {
+pub fn get_solar_settings() -> AppResult<SolarSettings> {
     get_solar_settings_internal()
 }
 
 #[tauri::command]
-pub async fn save_solar_location(app: AppHandle, address: String) -> Result<SolarSettings, String> {
+pub async fn save_solar_location(app: AppHandle, address: String) -> AppResult<SolarSettings> {
     let geocode = geocode_address_internal(&address).await?;
     save_solar_location_internal(&geocode)?;
 
@@ -261,11 +271,11 @@ pub async fn save_solar_location(app: AppHandle, address: String) -> Result<Sola
 }
 
 #[tauri::command]
-pub fn set_auto_theme_enabled(app: AppHandle, enabled: bool) -> Result<SolarSettings, String> {
+pub fn set_auto_theme_enabled(app: AppHandle, enabled: bool) -> AppResult<SolarSettings> {
     if enabled {
         let settings = get_solar_settings_internal()?;
         if settings.location.is_none() {
-            return Err("请先保存地址，再启用自动浅色/深色切换".to_string());
+            return Err(err("errors.auto_theme.location_required_for_enable"));
         }
     }
 
@@ -285,7 +295,7 @@ pub fn set_auto_theme_enabled(app: AppHandle, enabled: bool) -> Result<SolarSett
 pub async fn get_sun_times_by_address(
     address: String,
     date: Option<String>,
-) -> Result<SunTimesResult, String> {
+) -> AppResult<SunTimesResult> {
     let geocode = geocode_address_internal(&address).await?;
     let local_date = resolve_target_date(date.as_deref())?;
 
@@ -293,11 +303,11 @@ pub async fn get_sun_times_by_address(
 }
 
 #[tauri::command]
-pub fn get_sun_times_by_saved_location(date: Option<String>) -> Result<SunTimesResult, String> {
+pub fn get_sun_times_by_saved_location(date: Option<String>) -> AppResult<SunTimesResult> {
     let settings = get_solar_settings_internal()?;
     let geocode = settings
         .location
-        .ok_or_else(|| "请先保存地址，再查询日出日落".to_string())?;
+        .ok_or_else(|| err("errors.solar.location_required_for_query"))?;
     let local_date = resolve_target_date(date.as_deref())?;
 
     build_sun_times_result(geocode, local_date, Local::now())
@@ -307,7 +317,7 @@ fn build_sun_times_result(
     geocode: GeocodeResult,
     local_date: NaiveDate,
     now_local: DateTime<Local>,
-) -> Result<SunTimesResult, String> {
+) -> AppResult<SunTimesResult> {
     #[allow(deprecated)]
     let (sunrise_ts, sunset_ts) = sunrise::sunrise_sunset(
         geocode.latitude,
@@ -318,9 +328,9 @@ fn build_sun_times_result(
     );
 
     let sunrise_utc = chrono::DateTime::<Utc>::from_timestamp(sunrise_ts, 0)
-        .ok_or_else(|| "无法生成日出时间，请尝试其它地址或日期".to_string())?;
+        .ok_or_else(|| err("errors.sun_times.sunrise_generation_failed"))?;
     let sunset_utc = chrono::DateTime::<Utc>::from_timestamp(sunset_ts, 0)
-        .ok_or_else(|| "无法生成日落时间，请尝试其它地址或日期".to_string())?;
+        .ok_or_else(|| err("errors.sun_times.sunset_generation_failed"))?;
 
     let sunrise_local = sunrise_utc.with_timezone(&Local);
     let sunset_local = sunset_utc.with_timezone(&Local);
@@ -341,7 +351,7 @@ fn build_sun_times_result(
     } else {
         let next_date = local_date
             .succ_opt()
-            .ok_or_else(|| "日期计算失败，请重试".to_string())?;
+            .ok_or_else(|| err("errors.date.calculation_failed"))?;
 
         #[allow(deprecated)]
         let (next_sunrise_ts, _) = sunrise::sunrise_sunset(
@@ -353,7 +363,7 @@ fn build_sun_times_result(
         );
 
         let next_sunrise_utc = chrono::DateTime::<Utc>::from_timestamp(next_sunrise_ts, 0)
-            .ok_or_else(|| "无法生成下一次日出时间，请尝试其它地址或日期".to_string())?;
+            .ok_or_else(|| err("errors.sun_times.next_sunrise_generation_failed"))?;
         let next_sunrise_local = next_sunrise_utc.with_timezone(&Local);
 
         ("sunrise", next_sunrise_utc, next_sunrise_local)
@@ -395,17 +405,20 @@ fn format_hms(total_seconds: i64) -> String {
     format!("{hours:02}:{minutes:02}:{seconds:02}")
 }
 
-fn resolve_target_date(date: Option<&str>) -> Result<NaiveDate, String> {
+fn resolve_target_date(date: Option<&str>) -> AppResult<NaiveDate> {
     match date {
         Some(value) if !value.trim().is_empty() => {
             NaiveDate::parse_from_str(value.trim(), "%Y-%m-%d")
-                .map_err(|error| format!("日期格式错误（应为 YYYY-MM-DD）: {error}"))
+                .map_err(|error| {
+                    err_with_source("errors.date.invalid_format", error)
+                        .with_param("format", "YYYY-MM-DD")
+                })
         }
         _ => Ok(Local::now().date_naive()),
     }
 }
 
-fn get_solar_settings_internal() -> Result<SolarSettings, String> {
+fn get_solar_settings_internal() -> AppResult<SolarSettings> {
     use winreg::enums::{HKEY_CURRENT_USER, KEY_READ};
     use winreg::RegKey;
 
@@ -457,62 +470,62 @@ fn get_solar_settings_internal() -> Result<SolarSettings, String> {
     })
 }
 
-fn save_solar_location_internal(location: &GeocodeResult) -> Result<(), String> {
+fn save_solar_location_internal(location: &GeocodeResult) -> AppResult<()> {
     use winreg::enums::HKEY_CURRENT_USER;
     use winreg::RegKey;
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let (key, _) = hkcu
         .create_subkey(SETTINGS_KEY)
-        .map_err(|error| format!("创建设置注册表失败: {error}"))?;
+        .map_err(|error| err_with_source("errors.registry.create_settings_failed", error))?;
 
     key.set_value(SETTINGS_VALUE_SOLAR_ADDRESS, &location.address.as_str())
-        .map_err(|error| format!("保存地址失败: {error}"))?;
+        .map_err(|error| err_with_source("errors.solar.save_address_failed", error))?;
     key.set_value(
         SETTINGS_VALUE_SOLAR_DISPLAY_NAME,
         &location.display_name.as_str(),
     )
-    .map_err(|error| format!("保存地址展示名失败: {error}"))?;
+    .map_err(|error| err_with_source("errors.solar.save_display_name_failed", error))?;
     key.set_value(
         SETTINGS_VALUE_SOLAR_LATITUDE,
         &location.latitude.to_string(),
     )
-    .map_err(|error| format!("保存纬度失败: {error}"))?;
+    .map_err(|error| err_with_source("errors.solar.save_latitude_failed", error))?;
     key.set_value(
         SETTINGS_VALUE_SOLAR_LONGITUDE,
         &location.longitude.to_string(),
     )
-    .map_err(|error| format!("保存经度失败: {error}"))?;
+    .map_err(|error| err_with_source("errors.solar.save_longitude_failed", error))?;
 
     Ok(())
 }
 
-fn set_auto_theme_enabled_internal(enabled: bool) -> Result<(), String> {
+fn set_auto_theme_enabled_internal(enabled: bool) -> AppResult<()> {
     use winreg::enums::HKEY_CURRENT_USER;
     use winreg::RegKey;
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let (key, _) = hkcu
         .create_subkey(SETTINGS_KEY)
-        .map_err(|error| format!("创建设置注册表失败: {error}"))?;
+        .map_err(|error| err_with_source("errors.registry.create_settings_failed", error))?;
 
     let value: u32 = if enabled { 1 } else { 0 };
     key.set_value(SETTINGS_VALUE_SOLAR_AUTO_THEME_ENABLED, &value)
-        .map_err(|error| format!("保存自动切换开关失败: {error}"))?;
+        .map_err(|error| err_with_source("errors.solar.save_auto_theme_enabled_failed", error))?;
 
     Ok(())
 }
 
-async fn geocode_address_internal(address: &str) -> Result<GeocodeResult, String> {
+async fn geocode_address_internal(address: &str) -> AppResult<GeocodeResult> {
     let trimmed = address.trim();
     if trimmed.is_empty() {
-        return Err("地址不能为空".to_string());
+        return Err(err("errors.address.empty"));
     }
 
     let client = reqwest::Client::builder()
         .user_agent(NOMINATIM_USER_AGENT)
         .build()
-        .map_err(|error| format!("创建请求客户端失败: {error}"))?;
+        .map_err(|error| err_with_source("errors.network.client_build_failed", error))?;
 
     wait_for_nominatim_rate_limit().await;
 
@@ -526,32 +539,34 @@ async fn geocode_address_internal(address: &str) -> Result<GeocodeResult, String
         ])
         .send()
         .await
-        .map_err(|error| format!("请求 OpenStreetMap 失败: {error}"))?;
+        .map_err(|error| err_with_source("errors.network.openstreetmap_request_failed", error))?;
 
     let status = response.status();
     if !status.is_success() {
         let body = response.text().await.unwrap_or_default();
-        return Err(format!("地址解析失败（HTTP {}）: {}", status, body));
+        return Err(err("errors.geocode.http_failed")
+            .with_param("status", status)
+            .with_param("body", body));
     }
 
     let items: Vec<NominatimItem> = response
         .json()
         .await
-        .map_err(|error| format!("解析地址结果失败: {error}"))?;
+        .map_err(|error| err_with_source("errors.geocode.parse_failed", error))?;
 
     let first = items
         .into_iter()
         .next()
-        .ok_or_else(|| format!("未找到匹配地址: {trimmed}"))?;
+        .ok_or_else(|| err("errors.geocode.not_found").with_param("address", trimmed))?;
 
     let latitude = first
         .lat
         .parse::<f64>()
-        .map_err(|error| format!("纬度格式错误: {error}"))?;
+        .map_err(|error| err_with_source("errors.geocode.latitude_parse_failed", error))?;
     let longitude = first
         .lon
         .parse::<f64>()
-        .map_err(|error| format!("经度格式错误: {error}"))?;
+        .map_err(|error| err_with_source("errors.geocode.longitude_parse_failed", error))?;
 
     Ok(GeocodeResult {
         address: trimmed.to_string(),

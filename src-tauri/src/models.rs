@@ -1,4 +1,28 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AppError {
+    pub code: String,
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    pub params: HashMap<String, String>,
+}
+
+pub type AppResult<T> = Result<T, AppError>;
+
+impl AppError {
+    pub fn new(code: impl Into<String>) -> Self {
+        Self {
+            code: code.into(),
+            params: HashMap::new(),
+        }
+    }
+
+    pub fn with_param(mut self, key: impl Into<String>, value: impl ToString) -> Self {
+        self.params.insert(key.into(), value.to_string());
+        self
+    }
+}
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]

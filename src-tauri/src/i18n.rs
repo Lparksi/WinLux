@@ -1,4 +1,4 @@
-use crate::models::LanguageSettings;
+use crate::models::{AppError, AppResult, LanguageSettings};
 use std::collections::HashMap;
 use std::sync::OnceLock;
 use windows_sys::Win32::Globalization::GetUserDefaultLocaleName;
@@ -79,12 +79,19 @@ pub fn get_language_settings() -> LanguageSettings {
     }
 }
 
-pub fn set_language_preference(preference: &str) -> Result<(), String> {
+fn err_with_source(code: &str, source: impl ToString) -> AppError {
+    AppError::new(code).with_param("source", source.to_string())
+}
+
+pub fn set_language_preference(preference: &str) -> AppResult<()> {
     let normalized_preference = if preference.eq_ignore_ascii_case(LANGUAGE_PREFERENCE_AUTO) {
         LANGUAGE_PREFERENCE_AUTO.to_string()
     } else {
         canonicalize_language(preference)
-            .ok_or_else(|| format!("不支持的语言: {preference}"))?
+            .ok_or_else(|| {
+                AppError::new("errors.language.unsupported")
+                    .with_param("preference", preference)
+            })?
             .to_string()
     };
 
@@ -94,13 +101,13 @@ pub fn set_language_preference(preference: &str) -> Result<(), String> {
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let (key, _) = hkcu
         .create_subkey(SETTINGS_KEY)
-        .map_err(|error| format!("创建设置注册表失败: {error}"))?;
+        .map_err(|error| err_with_source("errors.registry.create_settings_failed", error))?;
 
     key.set_value(
         SETTINGS_VALUE_LANGUAGE_PREFERENCE,
         &normalized_preference.as_str(),
     )
-    .map_err(|error| format!("写入语言偏好失败: {error}"))?;
+    .map_err(|error| err_with_source("errors.language.preference_write_failed", error))?;
 
     Ok(())
 }
@@ -175,10 +182,6 @@ pub fn tray_auto_theme_label(language: &str, configured: bool, enabled: bool) ->
     }
 
     translate_shared(language, "tray.auto_theme.off")
-}
-
-pub fn auto_theme_configuration_required_message(language: &str) -> String {
-    translate_shared(language, "errors.auto_theme_configuration_required")
 }
 
 fn translate_shared(language: &str, key: &str) -> String {
