@@ -1,6 +1,16 @@
 !include LogicLib.nsh
 !include nsDialogs.nsh
 
+; Ensure PRODUCTNAME and MAINBINARYNAME are available when hooks are
+; compiled.  The installer template includes this file before defining
+; these constants, so we provide fallback values here.
+!ifndef PRODUCTNAME
+  !define PRODUCTNAME "WinLux"
+!endif
+!ifndef MAINBINARYNAME
+  !define MAINBINARYNAME "WinLux"
+!endif
+
 Var WinLuxStartupCheckbox
 Var WinLuxStartupCheckboxState
 

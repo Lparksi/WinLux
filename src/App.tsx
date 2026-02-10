@@ -137,6 +137,14 @@ function App() {
     void refreshLanguage()
     void refreshSolarSettings()
     void refreshStartupState()
+
+    const startupResyncTimer = window.setTimeout(() => {
+      void refreshStartupState()
+    }, 2000)
+
+    return () => {
+      window.clearTimeout(startupResyncTimer)
+    }
   }, [])
 
   useEffect(() => {

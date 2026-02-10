@@ -535,6 +535,7 @@ fn set_auto_theme_enabled_internal(enabled: bool) -> AppResult<()> {
 fn get_startup_state_internal() -> AppResult<StartupState> {
     use std::io::ErrorKind;
     use winreg::enums::{HKEY_CURRENT_USER, KEY_READ};
+    use winreg::types::FromRegValue;
     use winreg::RegKey;
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
@@ -548,7 +549,7 @@ fn get_startup_state_internal() -> AppResult<StartupState> {
         }
     };
 
-    let enabled = match key.get_raw_value(RUN_VALUE_WINLUX) {
+    let enabled_by_name = match key.get_raw_value(RUN_VALUE_WINLUX) {
         Ok(_) => true,
         Err(error) if error.kind() == ErrorKind::NotFound => false,
         Err(error) => {
@@ -556,12 +557,36 @@ fn get_startup_state_internal() -> AppResult<StartupState> {
         }
     };
 
-    Ok(StartupState { enabled })
+    if enabled_by_name {
+        return Ok(StartupState { enabled: true });
+    }
+
+    let exe_path = current_exe_text().ok();
+    let enabled_by_command = if let Some(exe_path) = exe_path {
+        key.enum_values().any(|entry| {
+            let Ok((_name, value)) = entry else {
+                return false;
+            };
+
+            let Ok(text) = String::from_reg_value(&value) else {
+                return false;
+            };
+
+            startup_entry_targets_current_exe(&text, &exe_path)
+        })
+    } else {
+        false
+    };
+
+    Ok(StartupState {
+        enabled: enabled_by_command,
+    })
 }
 
 fn set_startup_enabled_internal(enabled: bool) -> AppResult<()> {
     use std::io::ErrorKind;
     use winreg::enums::HKEY_CURRENT_USER;
+    use winreg::types::FromRegValue;
     use winreg::RegKey;
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
@@ -581,15 +606,59 @@ fn set_startup_enabled_internal(enabled: bool) -> AppResult<()> {
                 return Err(err_with_source("errors.registry.create_settings_failed", error));
             }
         }
+
+        if let Ok(exe_path) = current_exe_text() {
+            let value_names: Vec<String> = key
+                .enum_values()
+                .filter_map(Result::ok)
+                .filter_map(|(name, value)| {
+                    if name.eq_ignore_ascii_case(RUN_VALUE_WINLUX) {
+                        return None;
+                    }
+
+                    let Ok(text) = String::from_reg_value(&value) else {
+                        return None;
+                    };
+
+                    if startup_entry_targets_current_exe(&text, &exe_path) {
+                        Some(name)
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+
+            for value_name in value_names {
+                match key.delete_value(&value_name) {
+                    Ok(_) => {}
+                    Err(error) if error.kind() == ErrorKind::NotFound => {}
+                    Err(error) => {
+                        return Err(err_with_source("errors.registry.create_settings_failed", error));
+                    }
+                }
+            }
+        }
     }
 
     Ok(())
 }
 
-fn startup_run_command() -> AppResult<String> {
+fn current_exe_text() -> AppResult<String> {
     let exe_path = std::env::current_exe()
         .map_err(|error| err_with_source("errors.registry.open_failed", error))?;
-    let exe_text = exe_path.to_string_lossy();
+    Ok(exe_path.to_string_lossy().to_string())
+}
+
+fn startup_entry_targets_current_exe(command: &str, exe_path: &str) -> bool {
+    let normalized_command = command.trim().to_ascii_lowercase();
+    let normalized_exe_path = exe_path.to_ascii_lowercase();
+
+    normalized_command.contains(&normalized_exe_path)
+        && normalized_command.contains("--startup")
+}
+
+fn startup_run_command() -> AppResult<String> {
+    let exe_text = current_exe_text()?;
     Ok(format!("\"{exe_text}\" --startup"))
 }
 
