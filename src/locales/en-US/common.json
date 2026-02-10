@@ -96,5 +96,11 @@
   "errors.geocode.latitude_parse_failed": "Invalid latitude format: {source}",
   "errors.geocode.longitude_parse_failed": "Invalid longitude format: {source}",
   "errors.language.unsupported": "Unsupported language: {preference}",
-  "errors.language.preference_write_failed": "Failed to save language preference: {source}"
+  "errors.language.preference_write_failed": "Failed to save language preference: {source}",
+  "startup.toggle": "Run at Startup",
+  "startup.refresh": "Refresh Startup State",
+  "startup.current_status": "Startup status",
+  "startup.status_enabled": "Enabled",
+  "startup.status_disabled": "Disabled",
+  "tray.startup": "Run at Startup"
 }

@@ -30,6 +30,7 @@
     "targets": "nsis",
     "windows": {
       "nsis": {
+        "installerHooks": "./nsis/installer-hooks.nsh",
         "languages": [
           "English",
           "SimpChinese",

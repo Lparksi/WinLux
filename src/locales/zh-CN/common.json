@@ -96,5 +96,11 @@
   "errors.geocode.latitude_parse_failed": "纬度格式错误：{source}",
   "errors.geocode.longitude_parse_failed": "经度格式错误：{source}",
   "errors.language.unsupported": "不支持的语言：{preference}",
-  "errors.language.preference_write_failed": "写入语言偏好失败：{source}"
+  "errors.language.preference_write_failed": "写入语言偏好失败：{source}",
+  "startup.toggle": "????",
+  "startup.refresh": "????????",
+  "startup.current_status": "??????",
+  "startup.status_enabled": "???",
+  "startup.status_disabled": "???",
+  "tray.startup": "????"
 }

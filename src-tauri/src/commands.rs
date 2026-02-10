@@ -1,6 +1,6 @@
 use crate::models::{
-    AppError, AppResult, GeocodeResult, LanguageSettings, SolarSettings, SunTimesResult,
-    ThemeMode, ThemeState,
+    AppError, AppResult, GeocodeResult, LanguageSettings, SolarSettings, StartupState,
+    SunTimesResult, ThemeMode, ThemeState,
 };
 use chrono::{DateTime, Datelike, Local, NaiveDate, Utc};
 use serde::Deserialize;
@@ -15,9 +15,12 @@ use tokio::time::{sleep, timeout, Instant};
 
 pub const THEME_STATE_CHANGED_EVENT: &str = "theme-state-changed";
 pub const SOLAR_SETTINGS_CHANGED_EVENT: &str = "solar-settings-changed";
+pub const STARTUP_STATE_CHANGED_EVENT: &str = "startup-state-changed";
 pub const AUTO_THEME_CONFIGURATION_REQUIRED_EVENT: &str = "auto-theme-configuration-required";
 const PERSONALIZE_KEY: &str = "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
 const SETTINGS_KEY: &str = "Software\\WinLux";
+const RUN_KEY: &str = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+const RUN_VALUE_WINLUX: &str = "WinLux";
 const SETTINGS_VALUE_SOLAR_ADDRESS: &str = "SolarAddress";
 const SETTINGS_VALUE_SOLAR_DISPLAY_NAME: &str = "SolarDisplayName";
 const SETTINGS_VALUE_SOLAR_LATITUDE: &str = "SolarLatitude";
@@ -243,6 +246,19 @@ pub fn open_external_url(url: String) -> AppResult<()> {
         .map_err(|error| err_with_source("errors.browser.open_failed", error))?;
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn get_startup_state() -> AppResult<StartupState> {
+    get_startup_state_internal()
+}
+
+#[tauri::command]
+pub fn set_startup_enabled(app: AppHandle, enabled: bool) -> AppResult<StartupState> {
+    set_startup_enabled_internal(enabled)?;
+    let state = get_startup_state_internal()?;
+    let _ = app.emit(STARTUP_STATE_CHANGED_EVENT, &state);
+    Ok(state)
 }
 
 #[tauri::command]
@@ -514,6 +530,67 @@ fn set_auto_theme_enabled_internal(enabled: bool) -> AppResult<()> {
         .map_err(|error| err_with_source("errors.solar.save_auto_theme_enabled_failed", error))?;
 
     Ok(())
+}
+
+fn get_startup_state_internal() -> AppResult<StartupState> {
+    use std::io::ErrorKind;
+    use winreg::enums::{HKEY_CURRENT_USER, KEY_READ};
+    use winreg::RegKey;
+
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let key = match hkcu.open_subkey_with_flags(RUN_KEY, KEY_READ) {
+        Ok(key) => key,
+        Err(error) if error.kind() == ErrorKind::NotFound => {
+            return Ok(StartupState { enabled: false });
+        }
+        Err(error) => {
+            return Err(err_with_source("errors.registry.open_failed", error));
+        }
+    };
+
+    let enabled = match key.get_raw_value(RUN_VALUE_WINLUX) {
+        Ok(_) => true,
+        Err(error) if error.kind() == ErrorKind::NotFound => false,
+        Err(error) => {
+            return Err(err_with_source("errors.registry.open_failed", error));
+        }
+    };
+
+    Ok(StartupState { enabled })
+}
+
+fn set_startup_enabled_internal(enabled: bool) -> AppResult<()> {
+    use std::io::ErrorKind;
+    use winreg::enums::HKEY_CURRENT_USER;
+    use winreg::RegKey;
+
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let (key, _) = hkcu
+        .create_subkey(RUN_KEY)
+        .map_err(|error| err_with_source("errors.registry.create_settings_failed", error))?;
+
+    if enabled {
+        let startup_command = startup_run_command()?;
+        key.set_value(RUN_VALUE_WINLUX, &startup_command)
+            .map_err(|error| err_with_source("errors.registry.create_settings_failed", error))?;
+    } else {
+        match key.delete_value(RUN_VALUE_WINLUX) {
+            Ok(_) => {}
+            Err(error) if error.kind() == ErrorKind::NotFound => {}
+            Err(error) => {
+                return Err(err_with_source("errors.registry.create_settings_failed", error));
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn startup_run_command() -> AppResult<String> {
+    let exe_path = std::env::current_exe()
+        .map_err(|error| err_with_source("errors.registry.open_failed", error))?;
+    let exe_text = exe_path.to_string_lossy();
+    Ok(format!("\"{exe_text}\" --startup"))
 }
 
 async fn geocode_address_internal(address: &str) -> AppResult<GeocodeResult> {

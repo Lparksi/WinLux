@@ -80,3 +80,8 @@ pub struct SolarSettings {
     pub location: Option<GeocodeResult>,
     pub auto_theme_enabled: bool,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StartupState {
+    pub enabled: bool,
+}

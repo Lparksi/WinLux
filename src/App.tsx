@@ -5,6 +5,7 @@ import {
   AppErrorPayload,
   geocodeAddress,
   GeocodeResult,
+  getStartupState,
   getSolarSettings,
   getSunTimesBySavedLocation,
   getLanguageSettings,
@@ -16,9 +17,12 @@ import {
   openExternalUrl,
   saveSolarLocation,
   setAutoThemeEnabled,
+  setStartupEnabled,
   setThemeState,
   SolarSettings,
   SOLAR_SETTINGS_CHANGED_EVENT,
+  STARTUP_STATE_CHANGED_EVENT,
+  StartupState,
   SunTimesResult,
   ThemeState,
   THEME_STATE_CHANGED_EVENT,
@@ -95,6 +99,8 @@ function App() {
   const [solarSettings, setSolarSettings] = useState<SolarSettings | null>(null)
   const [todaySunTimes, setTodaySunTimes] = useState<SunTimesResult | null>(null)
   const [todaySunTimesLoading, setTodaySunTimesLoading] = useState(false)
+  const [startupLoading, setStartupLoading] = useState(false)
+  const [startupEnabled, setStartupEnabledLocal] = useState(false)
   const currentLanguage = languageSettings?.resolved ?? 'English'
 
   const registryPath =
@@ -130,6 +136,7 @@ function App() {
     void refreshTheme()
     void refreshLanguage()
     void refreshSolarSettings()
+    void refreshStartupState()
   }, [])
 
   useEffect(() => {
@@ -139,6 +146,24 @@ function App() {
       setThemeStateLocal(event.payload)
       setThemeError(null)
       setThemeLoading(false)
+    }).then((fn) => {
+      unlisten = fn
+    })
+
+    return () => {
+      if (unlisten) {
+        unlisten()
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined
+
+    void listen<StartupState>(STARTUP_STATE_CHANGED_EVENT, (event) => {
+      setStartupEnabledLocal(event.payload.enabled)
+      setThemeError(null)
+      setStartupLoading(false)
     }).then((fn) => {
       unlisten = fn
     })
@@ -217,6 +242,7 @@ function App() {
         void refreshTheme()
         void refreshLanguage()
         void refreshSolarSettings()
+        void refreshStartupState()
       }
     }
 
@@ -239,6 +265,19 @@ function App() {
       setThemeError(toErrorMessage(error, currentLanguage))
     } finally {
       setLanguageLoading(false)
+    }
+  }
+
+  const refreshStartupState = async () => {
+    setStartupLoading(true)
+    setThemeError(null)
+    try {
+      const state = await getStartupState()
+      setStartupEnabledLocal(state.enabled)
+    } catch (error) {
+      setThemeError(toErrorMessage(error, currentLanguage))
+    } finally {
+      setStartupLoading(false)
     }
   }
 
@@ -370,6 +409,19 @@ function App() {
     }
   }
 
+  const toggleStartup = async (enabled: boolean) => {
+    setStartupLoading(true)
+    setThemeError(null)
+    try {
+      const state = await setStartupEnabled(enabled)
+      setStartupEnabledLocal(state.enabled)
+    } catch (error) {
+      setThemeError(toErrorMessage(error, currentLanguage))
+    } finally {
+      setStartupLoading(false)
+    }
+  }
+
   const messages = useMemo(() => getMessages(currentLanguage), [currentLanguage])
 
   const updateTheme = async (next: ThemeState) => {
@@ -452,6 +504,11 @@ function App() {
             sunset: formatLocalClock(todaySunTimes.sunset_local),
           })
         : translate(currentLanguage, 'solar.today_failed')
+  const startupToggleText = translate(currentLanguage, 'startup.toggle')
+  const startupRefreshText = translate(currentLanguage, 'startup.refresh')
+  const startupCurrentStatusText = translate(currentLanguage, 'startup.current_status')
+  const startupEnabledText = translate(currentLanguage, 'startup.status_enabled')
+  const startupDisabledText = translate(currentLanguage, 'startup.status_disabled')
   const sunTimeDetails = sunTimesResult
     ? [
         {
@@ -595,6 +652,7 @@ function App() {
               void refreshTheme()
               void refreshLanguage()
               void refreshSolarSettings()
+              void refreshStartupState()
             }}
           >
             <svg
@@ -656,6 +714,48 @@ function App() {
 
         <section className="panel infoPanel">
           <p className="hint">{messages.hideToTrayHint}</p>
+          <div className="kv">
+            <span className="label">{startupToggleText}</span>
+            <div className="switchRow startupSwitchRow">
+              <button
+                type="button"
+                className={`btn ${startupEnabled ? 'btnPrimary' : 'btnSecondary'}`}
+                disabled={startupLoading}
+                onClick={() => {
+                  void toggleStartup(true)
+                }}
+              >
+                {translate(currentLanguage, 'common.enable')}
+              </button>
+              <button
+                type="button"
+                className={`btn ${startupEnabled ? 'btnSecondary' : 'btnPrimary'}`}
+                disabled={startupLoading}
+                onClick={() => {
+                  void toggleStartup(false)
+                }}
+              >
+                {translate(currentLanguage, 'common.disable')}
+              </button>
+              <button
+                type="button"
+                className="btn btnGhost"
+                disabled={startupLoading}
+                onClick={() => {
+                  void refreshStartupState()
+                }}
+              >
+                {startupLoading
+                  ? translate(currentLanguage, 'common.loading')
+                  : startupRefreshText}
+              </button>
+            </div>
+            <code className="code">
+              {startupCurrentStatusText}
+              {translate(currentLanguage, 'common.kv_separator')}
+              {startupEnabled ? startupEnabledText : startupDisabledText}
+            </code>
+          </div>
           <p className="hint">
             {translate(currentLanguage, 'info.osm_copyright_prefix')}
             <a

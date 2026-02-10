@@ -9,8 +9,8 @@ pub const LANGUAGE_PREFERENCE_AUTO: &str = "auto";
 const SETTINGS_KEY: &str = "Software\\WinLux";
 const SETTINGS_VALUE_LANGUAGE_PREFERENCE: &str = "LanguagePreference";
 
-static SHARED_MESSAGES_EN_US: OnceLock<HashMap<String, String>> = OnceLock::new();
-static SHARED_MESSAGES_ZH_CN: OnceLock<HashMap<String, String>> = OnceLock::new();
+static SHARED_MESSAGES_BY_LOCALE: OnceLock<HashMap<&'static str, HashMap<String, String>>> =
+    OnceLock::new();
 static TRAY_TEXTS: OnceLock<HashMap<String, TrayTextsOwned>> = OnceLock::new();
 
 pub const INSTALLER_LANGUAGES: [&str; 30] = [
@@ -172,6 +172,10 @@ pub fn tray_texts(language: &str) -> TrayTexts {
     }
 }
 
+pub fn tray_startup_label(language: &str) -> String {
+    translate_shared(language, "tray.startup")
+}
+
 pub fn tray_auto_theme_label(language: &str, configured: bool, enabled: bool) -> String {
     if !configured {
         return translate_shared(language, "tray.auto_theme.not_configured");
@@ -196,19 +200,175 @@ fn translate_shared(language: &str, key: &str) -> String {
 }
 
 fn shared_messages(language: &str) -> &'static HashMap<String, String> {
-    if language.eq_ignore_ascii_case("SimpChinese") || language.eq_ignore_ascii_case("TradChinese") {
-        return shared_messages_for_locale("zh-CN");
-    }
-
-    shared_messages_for_locale("en-US")
+    let resolved_language = resolve_language(language);
+    let locale = shared_locale_for_language(resolved_language);
+    shared_messages_for_locale(locale)
 }
 
 fn shared_messages_for_locale(locale: &str) -> &'static HashMap<String, String> {
-    match locale {
-        "zh-CN" => SHARED_MESSAGES_ZH_CN
-            .get_or_init(|| serde_json::from_str(include_str!("../../src/locales/zh-CN/common.json")).unwrap_or_default()),
-        _ => SHARED_MESSAGES_EN_US
-            .get_or_init(|| serde_json::from_str(include_str!("../../src/locales/en-US/common.json")).unwrap_or_default()),
+    let map = SHARED_MESSAGES_BY_LOCALE.get_or_init(build_shared_messages_by_locale);
+    map.get(locale)
+        .or_else(|| map.get("en-US"))
+        .expect("shared locale map must include en-US")
+}
+
+fn build_shared_messages_by_locale() -> HashMap<&'static str, HashMap<String, String>> {
+    let mut map = HashMap::new();
+    map.insert(
+        "en-US",
+        serde_json::from_str(include_str!("../../src/locales/en-US/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "zh-CN",
+        serde_json::from_str(include_str!("../../src/locales/zh-CN/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "zh-TW",
+        serde_json::from_str(include_str!("../../src/locales/zh-TW/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "ja-JP",
+        serde_json::from_str(include_str!("../../src/locales/ja-JP/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "ko-KR",
+        serde_json::from_str(include_str!("../../src/locales/ko-KR/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "th-TH",
+        serde_json::from_str(include_str!("../../src/locales/th-TH/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "vi-VN",
+        serde_json::from_str(include_str!("../../src/locales/vi-VN/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "id-ID",
+        serde_json::from_str(include_str!("../../src/locales/id-ID/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "fr-FR",
+        serde_json::from_str(include_str!("../../src/locales/fr-FR/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "de-DE",
+        serde_json::from_str(include_str!("../../src/locales/de-DE/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "it-IT",
+        serde_json::from_str(include_str!("../../src/locales/it-IT/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "es-ES",
+        serde_json::from_str(include_str!("../../src/locales/es-ES/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "es-419",
+        serde_json::from_str(include_str!("../../src/locales/es-419/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "pt-PT",
+        serde_json::from_str(include_str!("../../src/locales/pt-PT/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "pt-BR",
+        serde_json::from_str(include_str!("../../src/locales/pt-BR/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "ru-RU",
+        serde_json::from_str(include_str!("../../src/locales/ru-RU/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "pl-PL",
+        serde_json::from_str(include_str!("../../src/locales/pl-PL/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "tr-TR",
+        serde_json::from_str(include_str!("../../src/locales/tr-TR/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "uk-UA",
+        serde_json::from_str(include_str!("../../src/locales/uk-UA/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "cs-CZ",
+        serde_json::from_str(include_str!("../../src/locales/cs-CZ/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "hu-HU",
+        serde_json::from_str(include_str!("../../src/locales/hu-HU/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "el-GR",
+        serde_json::from_str(include_str!("../../src/locales/el-GR/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "bg-BG",
+        serde_json::from_str(include_str!("../../src/locales/bg-BG/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "ro-RO",
+        serde_json::from_str(include_str!("../../src/locales/ro-RO/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "ar-SA",
+        serde_json::from_str(include_str!("../../src/locales/ar-SA/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "nl-NL",
+        serde_json::from_str(include_str!("../../src/locales/nl-NL/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "da-DK",
+        serde_json::from_str(include_str!("../../src/locales/da-DK/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "fi-FI",
+        serde_json::from_str(include_str!("../../src/locales/fi-FI/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "nb-NO",
+        serde_json::from_str(include_str!("../../src/locales/nb-NO/common.json")).unwrap_or_default(),
+    );
+    map.insert(
+        "sv-SE",
+        serde_json::from_str(include_str!("../../src/locales/sv-SE/common.json")).unwrap_or_default(),
+    );
+    map
+}
+
+fn shared_locale_for_language(language: &str) -> &'static str {
+    match language {
+        "SimpChinese" => "zh-CN",
+        "TradChinese" => "zh-TW",
+        "Japanese" => "ja-JP",
+        "Korean" => "ko-KR",
+        "Thai" => "th-TH",
+        "Vietnamese" => "vi-VN",
+        "Indonesian" => "id-ID",
+        "French" => "fr-FR",
+        "German" => "de-DE",
+        "Italian" => "it-IT",
+        "Spanish" => "es-ES",
+        "SpanishInternational" => "es-419",
+        "Portuguese" => "pt-PT",
+        "PortugueseBR" => "pt-BR",
+        "Russian" => "ru-RU",
+        "Polish" => "pl-PL",
+        "Turkish" => "tr-TR",
+        "Ukrainian" => "uk-UA",
+        "Czech" => "cs-CZ",
+        "Hungarian" => "hu-HU",
+        "Greek" => "el-GR",
+        "Bulgarian" => "bg-BG",
+        "Romanian" => "ro-RO",
+        "Arabic" => "ar-SA",
+        "Dutch" => "nl-NL",
+        "Danish" => "da-DK",
+        "Finnish" => "fi-FI",
+        "Norwegian" => "nb-NO",
+        "Swedish" => "sv-SE",
+        _ => "en-US",
     }
 }
 

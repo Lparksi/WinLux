@@ -385,6 +385,10 @@ button:disabled {
   gap: 8px;
 }
 
+.startupSwitchRow {
+  margin-bottom: 4px;
+}
+
 .field {
   display: grid;
   gap: 6px;

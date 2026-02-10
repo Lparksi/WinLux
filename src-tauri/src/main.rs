@@ -10,6 +10,8 @@ use tauri::Manager;
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
+            let startup_launch = std::env::args().any(|arg| arg == "--startup");
+
             tray::setup_tray(&app.handle())?;
             tray::refresh_tray_language()?;
             commands::start_auto_theme_worker(app.handle().clone());
@@ -18,6 +20,10 @@ fn main() {
             if let Some(window) = app.get_webview_window("main") {
                 if let Ok(theme_state) = commands::get_theme_state() {
                     commands::apply_window_theme(&window, theme_state.apps);
+                }
+
+                if startup_launch {
+                    let _ = window.hide();
                 }
             }
 
@@ -34,6 +40,8 @@ fn main() {
             commands::get_solar_settings,
             commands::save_solar_location,
             commands::set_auto_theme_enabled,
+            commands::get_startup_state,
+            commands::set_startup_enabled,
             commands::open_external_url,
         ])
         .on_window_event(|window, event| {

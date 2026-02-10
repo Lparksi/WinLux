@@ -12,6 +12,7 @@ const MENU_OPEN_MAIN: &str = "tray_open_main";
 const MENU_THEME_DARK: &str = "tray_theme_dark";
 const MENU_THEME_LIGHT: &str = "tray_theme_light";
 const MENU_AUTO_THEME: &str = "tray_auto_theme";
+const MENU_STARTUP: &str = "tray_startup";
 const MENU_LANGUAGE_AUTO: &str = "tray_language_auto";
 const MENU_LANGUAGE_PREFIX: &str = "tray_language_";
 const MENU_LANGUAGE_MENU: &str = "tray_language_menu";
@@ -22,6 +23,7 @@ struct TrayMenuHandles {
     theme_dark: CheckMenuItem<Wry>,
     theme_light: CheckMenuItem<Wry>,
     auto_theme: CheckMenuItem<Wry>,
+    startup: CheckMenuItem<Wry>,
     language_menu: Submenu<Wry>,
     language_auto: CheckMenuItem<Wry>,
     language_items: Vec<(String, CheckMenuItem<Wry>)>,
@@ -97,6 +99,21 @@ fn refresh_auto_theme_menu_item() {
     }
 }
 
+fn refresh_startup_menu_item() {
+    let Ok(startup_state) = crate::commands::get_startup_state() else {
+        return;
+    };
+
+    let Ok(handles_guard) = tray_menu_handles().lock() else {
+        return;
+    };
+
+    if let Some(handles) = handles_guard.as_ref() {
+        let _ = handles.startup.set_checked(startup_state.enabled);
+        let _ = handles.startup.set_enabled(true);
+    }
+}
+
 pub fn refresh_tray_language() -> Result<()> {
     let settings = i18n::get_language_settings();
     let current_language = settings.resolved;
@@ -121,6 +138,12 @@ pub fn refresh_tray_language() -> Result<()> {
             handles
                 .auto_theme
                 .set_checked(solar_settings.auto_theme_enabled)?;
+        }
+        handles
+            .startup
+            .set_text(&i18n::tray_startup_label(&current_language))?;
+        if let Ok(startup_state) = crate::commands::get_startup_state() {
+            handles.startup.set_checked(startup_state.enabled)?;
         }
         handles.language_menu.set_text(i18n::language_menu_label(
             &texts.language_menu,
@@ -192,6 +215,17 @@ fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
         None::<&str>,
     )?;
 
+    let startup_state = crate::commands::get_startup_state()
+        .unwrap_or(crate::models::StartupState { enabled: false });
+    let startup = CheckMenuItem::with_id(
+        app,
+        MENU_STARTUP,
+        &i18n::tray_startup_label(&current_language),
+        true,
+        startup_state.enabled,
+        None::<&str>,
+    )?;
+
     let language_auto = CheckMenuItem::with_id(
         app,
         MENU_LANGUAGE_AUTO,
@@ -240,6 +274,7 @@ fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
             &theme_dark,
             &theme_light,
             &auto_theme,
+            &startup,
             &language_menu,
             &separator_bottom,
             &quit,
@@ -251,6 +286,7 @@ fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
         theme_dark,
         theme_light,
         auto_theme,
+        startup,
         language_menu,
         language_auto,
         language_items,
@@ -273,6 +309,10 @@ pub fn setup_tray(app: &AppHandle) -> Result<()> {
 
     app.listen_any(crate::commands::SOLAR_SETTINGS_CHANGED_EVENT, move |_| {
         refresh_auto_theme_menu_item();
+    });
+
+    app.listen_any(crate::commands::STARTUP_STATE_CHANGED_EVENT, move |_| {
+        refresh_startup_menu_item();
     });
 
     // Reuse the window icon as tray icon (works as long as we have an icon embedded).
@@ -335,6 +375,15 @@ pub fn setup_tray(app: &AppHandle) -> Result<()> {
                     );
                     refresh_auto_theme_menu_item();
                 }
+                MENU_STARTUP => {
+                    let current_state = crate::commands::get_startup_state();
+                    let Ok(state) = current_state else {
+                        return;
+                    };
+
+                    let _ = crate::commands::set_startup_enabled(app.clone(), !state.enabled);
+                    refresh_startup_menu_item();
+                }
                 MENU_QUIT => {
                     app.exit(0);
                 }
@@ -367,6 +416,7 @@ pub fn setup_tray(app: &AppHandle) -> Result<()> {
             } => {
                 refresh_theme_menu_items();
                 refresh_auto_theme_menu_item();
+                refresh_startup_menu_item();
                 let _ = refresh_tray_language();
             }
             _ => {}

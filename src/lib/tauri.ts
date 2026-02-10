@@ -28,6 +28,10 @@ export interface SolarSettings {
   auto_theme_enabled: boolean
 }
 
+export interface StartupState {
+  enabled: boolean
+}
+
 export interface SunTimesResult {
   address: string
   display_name: string
@@ -82,6 +86,14 @@ export const setAutoThemeEnabled = (enabled: boolean): Promise<SolarSettings> =>
   return invoke('set_auto_theme_enabled', { enabled })
 }
 
+export const getStartupState = (): Promise<StartupState> => {
+  return invoke('get_startup_state')
+}
+
+export const setStartupEnabled = (enabled: boolean): Promise<StartupState> => {
+  return invoke('set_startup_enabled', { enabled })
+}
+
 export const getSunTimesByAddress = (
   address: string,
   date?: string,
@@ -100,5 +112,6 @@ export const openExternalUrl = (url: string): Promise<void> => {
 export const THEME_STATE_CHANGED_EVENT = 'theme-state-changed'
 export const LANGUAGE_CHANGED_EVENT = 'language-changed'
 export const SOLAR_SETTINGS_CHANGED_EVENT = 'solar-settings-changed'
+export const STARTUP_STATE_CHANGED_EVENT = 'startup-state-changed'
 export const AUTO_THEME_CONFIGURATION_REQUIRED_EVENT =
   'auto-theme-configuration-required'
