@@ -1,0 +1,242 @@
+{
+  "English": {
+    "open_main": "Open Main Window",
+    "dark_mode": "Dark Mode",
+    "light_mode": "Light Mode",
+    "language_menu": "Language",
+    "language_auto": "Auto (Follow System)",
+    "quit": "Quit"
+  },
+  "SimpChinese": {
+    "open_main": "打开主界面",
+    "dark_mode": "深色模式",
+    "light_mode": "浅色模式",
+    "language_menu": "语言",
+    "language_auto": "自动（跟随系统）",
+    "quit": "退出"
+  },
+  "TradChinese": {
+    "open_main": "開啟主畫面",
+    "dark_mode": "深色模式",
+    "light_mode": "淺色模式",
+    "language_menu": "語言",
+    "language_auto": "自動（跟隨系統）",
+    "quit": "退出"
+  },
+  "Japanese": {
+    "open_main": "メイン画面を開く",
+    "dark_mode": "ダークモード",
+    "light_mode": "ライトモード",
+    "language_menu": "言語",
+    "language_auto": "自動（システムに従う）",
+    "quit": "終了"
+  },
+  "Korean": {
+    "open_main": "메인 창 열기",
+    "dark_mode": "다크 모드",
+    "light_mode": "라이트 모드",
+    "language_menu": "언어",
+    "language_auto": "자동 (시스템 따라가기)",
+    "quit": "종료"
+  },
+  "Thai": {
+    "open_main": "เปิดหน้าหลัก",
+    "dark_mode": "โหมดมืด",
+    "light_mode": "โหมดสว่าง",
+    "language_menu": "ภาษา",
+    "language_auto": "อัตโนมัติ (ตามระบบ)",
+    "quit": "ออก"
+  },
+  "Vietnamese": {
+    "open_main": "Mở cửa sổ chính",
+    "dark_mode": "Chế độ tối",
+    "light_mode": "Chế độ sáng",
+    "language_menu": "Ngôn ngữ",
+    "language_auto": "Tự động (Theo hệ thống)",
+    "quit": "Thoát"
+  },
+  "Indonesian": {
+    "open_main": "Buka jendela utama",
+    "dark_mode": "Mode gelap",
+    "light_mode": "Mode terang",
+    "language_menu": "Bahasa",
+    "language_auto": "Otomatis (Ikuti sistem)",
+    "quit": "Keluar"
+  },
+  "French": {
+    "open_main": "Ouvrir la fenêtre principale",
+    "dark_mode": "Mode sombre",
+    "light_mode": "Mode clair",
+    "language_menu": "Langue",
+    "language_auto": "Auto (Suivre le système)",
+    "quit": "Quitter"
+  },
+  "German": {
+    "open_main": "Hauptfenster öffnen",
+    "dark_mode": "Dunkelmodus",
+    "light_mode": "Hellmodus",
+    "language_menu": "Sprache",
+    "language_auto": "Automatisch (System folgen)",
+    "quit": "Beenden"
+  },
+  "Italian": {
+    "open_main": "Apri finestra principale",
+    "dark_mode": "Modalità scura",
+    "light_mode": "Modalità chiara",
+    "language_menu": "Lingua",
+    "language_auto": "Automatico (Segui sistema)",
+    "quit": "Esci"
+  },
+  "Spanish": {
+    "open_main": "Abrir ventana principal",
+    "dark_mode": "Modo oscuro",
+    "light_mode": "Modo claro",
+    "language_menu": "Idioma",
+    "language_auto": "Automático (Seguir sistema)",
+    "quit": "Salir"
+  },
+  "SpanishInternational": {
+    "open_main": "Abrir ventana principal",
+    "dark_mode": "Modo oscuro",
+    "light_mode": "Modo claro",
+    "language_menu": "Idioma",
+    "language_auto": "Automático (Seguir sistema)",
+    "quit": "Salir"
+  },
+  "Portuguese": {
+    "open_main": "Abrir janela principal",
+    "dark_mode": "Modo escuro",
+    "light_mode": "Modo claro",
+    "language_menu": "Idioma",
+    "language_auto": "Automático (Seguir sistema)",
+    "quit": "Sair"
+  },
+  "PortugueseBR": {
+    "open_main": "Abrir janela principal",
+    "dark_mode": "Modo escuro",
+    "light_mode": "Modo claro",
+    "language_menu": "Idioma",
+    "language_auto": "Automático (Seguir sistema)",
+    "quit": "Sair"
+  },
+  "Russian": {
+    "open_main": "Открыть главное окно",
+    "dark_mode": "Тёмный режим",
+    "light_mode": "Светлый режим",
+    "language_menu": "Язык",
+    "language_auto": "Авто (Следовать системе)",
+    "quit": "Выход"
+  },
+  "Polish": {
+    "open_main": "Otwórz okno główne",
+    "dark_mode": "Tryb ciemny",
+    "light_mode": "Tryb jasny",
+    "language_menu": "Język",
+    "language_auto": "Automatycznie (Jak system)",
+    "quit": "Zakończ"
+  },
+  "Turkish": {
+    "open_main": "Ana pencereyi aç",
+    "dark_mode": "Koyu mod",
+    "light_mode": "Açık mod",
+    "language_menu": "Dil",
+    "language_auto": "Otomatik (Sistemi izle)",
+    "quit": "Çıkış"
+  },
+  "Ukrainian": {
+    "open_main": "Відкрити головне вікно",
+    "dark_mode": "Темний режим",
+    "light_mode": "Світлий режим",
+    "language_menu": "Мова",
+    "language_auto": "Авто (Слідувати системі)",
+    "quit": "Вийти"
+  },
+  "Czech": {
+    "open_main": "Otevřít hlavní okno",
+    "dark_mode": "Tmavý režim",
+    "light_mode": "Světlý režim",
+    "language_menu": "Jazyk",
+    "language_auto": "Automaticky (Podle systému)",
+    "quit": "Ukončit"
+  },
+  "Hungarian": {
+    "open_main": "Főablak megnyitása",
+    "dark_mode": "Sötét mód",
+    "light_mode": "Világos mód",
+    "language_menu": "Nyelv",
+    "language_auto": "Automatikus (Rendszer szerint)",
+    "quit": "Kilépés"
+  },
+  "Greek": {
+    "open_main": "Άνοιγμα κύριου παραθύρου",
+    "dark_mode": "Σκοτεινή λειτουργία",
+    "light_mode": "Φωτεινή λειτουργία",
+    "language_menu": "Γλώσσα",
+    "language_auto": "Αυτόματα (Ακολουθεί σύστημα)",
+    "quit": "Έξοδος"
+  },
+  "Bulgarian": {
+    "open_main": "Отвори главния прозорец",
+    "dark_mode": "Тъмен режим",
+    "light_mode": "Светъл режим",
+    "language_menu": "Език",
+    "language_auto": "Автоматично (По системата)",
+    "quit": "Изход"
+  },
+  "Romanian": {
+    "open_main": "Deschide fereastra principală",
+    "dark_mode": "Mod întunecat",
+    "light_mode": "Mod luminos",
+    "language_menu": "Limbă",
+    "language_auto": "Automat (Urmează sistemul)",
+    "quit": "Ieșire"
+  },
+  "Arabic": {
+    "open_main": "فتح النافذة الرئيسية",
+    "dark_mode": "الوضع الداكن",
+    "light_mode": "الوضع الفاتح",
+    "language_menu": "اللغة",
+    "language_auto": "تلقائي (اتّباع النظام)",
+    "quit": "خروج"
+  },
+  "Dutch": {
+    "open_main": "Hoofdvenster openen",
+    "dark_mode": "Donkere modus",
+    "light_mode": "Lichte modus",
+    "language_menu": "Taal",
+    "language_auto": "Automatisch (Systeem volgen)",
+    "quit": "Afsluiten"
+  },
+  "Danish": {
+    "open_main": "Åbn hovedvindue",
+    "dark_mode": "Mørk tilstand",
+    "light_mode": "Lys tilstand",
+    "language_menu": "Sprog",
+    "language_auto": "Auto (Følg system)",
+    "quit": "Afslut"
+  },
+  "Finnish": {
+    "open_main": "Avaa pääikkuna",
+    "dark_mode": "Tumma tila",
+    "light_mode": "Vaalea tila",
+    "language_menu": "Kieli",
+    "language_auto": "Automaattinen (Seuraa järjestelmää)",
+    "quit": "Poistu"
+  },
+  "Norwegian": {
+    "open_main": "Åpne hovedvindu",
+    "dark_mode": "Mørk modus",
+    "light_mode": "Lys modus",
+    "language_menu": "Språk",
+    "language_auto": "Auto (Følg system)",
+    "quit": "Avslutt"
+  },
+  "Swedish": {
+    "open_main": "Öppna huvudfönster",
+    "dark_mode": "Mörkt läge",
+    "light_mode": "Ljust läge",
+    "language_menu": "Språk",
+    "language_auto": "Auto (Följ systemet)",
+    "quit": "Avsluta"
+  }
+}

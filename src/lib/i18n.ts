@@ -1,3 +1,34 @@
+import enCommon from '../locales/en-US/common.json'
+import arSaCommon from '../locales/ar-SA/common.json'
+import bgBgCommon from '../locales/bg-BG/common.json'
+import csCzCommon from '../locales/cs-CZ/common.json'
+import daDkCommon from '../locales/da-DK/common.json'
+import deDeCommon from '../locales/de-DE/common.json'
+import elGrCommon from '../locales/el-GR/common.json'
+import es419Common from '../locales/es-419/common.json'
+import esEsCommon from '../locales/es-ES/common.json'
+import fiFiCommon from '../locales/fi-FI/common.json'
+import frFrCommon from '../locales/fr-FR/common.json'
+import huHuCommon from '../locales/hu-HU/common.json'
+import idIdCommon from '../locales/id-ID/common.json'
+import itItCommon from '../locales/it-IT/common.json'
+import jaJpCommon from '../locales/ja-JP/common.json'
+import koKrCommon from '../locales/ko-KR/common.json'
+import nbNoCommon from '../locales/nb-NO/common.json'
+import nlNlCommon from '../locales/nl-NL/common.json'
+import plPlCommon from '../locales/pl-PL/common.json'
+import ptBrCommon from '../locales/pt-BR/common.json'
+import ptPtCommon from '../locales/pt-PT/common.json'
+import roRoCommon from '../locales/ro-RO/common.json'
+import ruRuCommon from '../locales/ru-RU/common.json'
+import svSeCommon from '../locales/sv-SE/common.json'
+import thThCommon from '../locales/th-TH/common.json'
+import trTrCommon from '../locales/tr-TR/common.json'
+import ukUaCommon from '../locales/uk-UA/common.json'
+import viVnCommon from '../locales/vi-VN/common.json'
+import zhCnCommon from '../locales/zh-CN/common.json'
+import zhTwCommon from '../locales/zh-TW/common.json'
+
 export const INSTALLER_LANGUAGES = [
   'English',
   'SimpChinese',
@@ -32,6 +63,146 @@ export const INSTALLER_LANGUAGES = [
 ] as const
 
 export type InstallerLanguage = (typeof INSTALLER_LANGUAGES)[number]
+
+type SharedLocale =
+  | 'ar-SA'
+  | 'bg-BG'
+  | 'cs-CZ'
+  | 'da-DK'
+  | 'de-DE'
+  | 'el-GR'
+  | 'en-US'
+  | 'es-419'
+  | 'fi-FI'
+  | 'hu-HU'
+  | 'id-ID'
+  | 'it-IT'
+  | 'nb-NO'
+  | 'nl-NL'
+  | 'pl-PL'
+  | 'pt-BR'
+  | 'pt-PT'
+  | 'ro-RO'
+  | 'zh-CN'
+  | 'zh-TW'
+  | 'ja-JP'
+  | 'ko-KR'
+  | 'fr-FR'
+  | 'es-ES'
+  | 'sv-SE'
+  | 'th-TH'
+  | 'tr-TR'
+  | 'uk-UA'
+  | 'vi-VN'
+  | 'ru-RU'
+type InterpolationValues = Record<string, string | number>
+
+const SHARED_MESSAGES: Record<SharedLocale, Record<string, string>> = {
+  'ar-SA': arSaCommon,
+  'bg-BG': bgBgCommon,
+  'cs-CZ': csCzCommon,
+  'da-DK': daDkCommon,
+  'de-DE': deDeCommon,
+  'el-GR': elGrCommon,
+  'en-US': enCommon,
+  'es-419': es419Common,
+  'es-ES': esEsCommon,
+  'fi-FI': fiFiCommon,
+  'fr-FR': frFrCommon,
+  'hu-HU': huHuCommon,
+  'id-ID': idIdCommon,
+  'it-IT': itItCommon,
+  'ja-JP': jaJpCommon,
+  'ko-KR': koKrCommon,
+  'nb-NO': nbNoCommon,
+  'nl-NL': nlNlCommon,
+  'pl-PL': plPlCommon,
+  'pt-BR': ptBrCommon,
+  'pt-PT': ptPtCommon,
+  'ro-RO': roRoCommon,
+  'ru-RU': ruRuCommon,
+  'sv-SE': svSeCommon,
+  'th-TH': thThCommon,
+  'tr-TR': trTrCommon,
+  'uk-UA': ukUaCommon,
+  'vi-VN': viVnCommon,
+  'zh-CN': zhCnCommon,
+  'zh-TW': zhTwCommon,
+}
+
+const SHARED_LOCALE_BY_LANGUAGE: Record<InstallerLanguage, SharedLocale> = {
+  English: 'en-US',
+  SimpChinese: 'zh-CN',
+  TradChinese: 'zh-TW',
+  Japanese: 'ja-JP',
+  Korean: 'ko-KR',
+  Thai: 'th-TH',
+  Vietnamese: 'vi-VN',
+  Indonesian: 'id-ID',
+  French: 'fr-FR',
+  German: 'de-DE',
+  Italian: 'it-IT',
+  Spanish: 'es-ES',
+  SpanishInternational: 'es-419',
+  Portuguese: 'pt-PT',
+  PortugueseBR: 'pt-BR',
+  Russian: 'ru-RU',
+  Polish: 'pl-PL',
+  Turkish: 'tr-TR',
+  Ukrainian: 'uk-UA',
+  Czech: 'cs-CZ',
+  Hungarian: 'hu-HU',
+  Greek: 'el-GR',
+  Bulgarian: 'bg-BG',
+  Romanian: 'ro-RO',
+  Arabic: 'ar-SA',
+  Dutch: 'nl-NL',
+  Danish: 'da-DK',
+  Finnish: 'fi-FI',
+  Norwegian: 'nb-NO',
+  Swedish: 'sv-SE',
+}
+
+const INTERPOLATION_PATTERN = /\{([a-zA-Z0-9_]+)\}/g
+
+const resolveLanguageKey = (language: string): InstallerLanguage => {
+  const key = language as InstallerLanguage
+  if (INSTALLER_LANGUAGES.includes(key)) {
+    return key
+  }
+
+  const normalized = language.toLowerCase()
+  return INSTALLER_LANGUAGES.find((candidate) => candidate.toLowerCase() === normalized) ?? 'English'
+}
+
+const resolveSharedLocale = (language: string): SharedLocale => {
+  const key = resolveLanguageKey(language)
+  return SHARED_LOCALE_BY_LANGUAGE[key]
+}
+
+export const translate = (
+  language: string,
+  translationKey: string,
+  values?: InterpolationValues,
+): string => {
+  const locale = resolveSharedLocale(language)
+  const message =
+    SHARED_MESSAGES[locale][translationKey] ??
+    SHARED_MESSAGES['en-US'][translationKey] ??
+    translationKey
+
+  if (!values) {
+    return message
+  }
+
+  return message.replace(INTERPOLATION_PATTERN, (_, token: string) => {
+    if (!(token in values)) {
+      return `{${token}}`
+    }
+
+    return String(values[token])
+  })
+}
 
 export type Messages = {
   subtitle: string

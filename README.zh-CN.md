@@ -69,6 +69,7 @@ bun run tauri:dev
 | `bun run dev` | 仅启动 Vite 前端（`http://localhost:5173`） |
 | `bun run build` | 类型检查并构建前端资源到 `dist/` |
 | `bun run typecheck` | 仅执行 TypeScript 类型检查 |
+| `bun run i18n:check` | 校验多语言 key 与占位符一致性 |
 | `bun run tauri:dev` | 启动 Tauri 桌面开发模式 |
 | `bun run tauri:build` | 构建桌面安装包（NSIS） |
 | `bun run release` | 按最新 Git Tag 推导版本并执行构建 |
@@ -98,7 +99,7 @@ cargo test -p winlux
 ## 语言说明
 
 - 主窗口界面文案已覆盖上述 30 种语言选项。
-- 托盘与安装器语言选项覆盖 30 个安装器语言标识。
+- 托盘菜单文案已外置到 `src/locales/tray-texts.json`，覆盖 30 个安装器语言标识。
 - 语言偏好存储位置：
   - `HKCU\Software\WinLux\LanguagePreference`
 

@@ -91,7 +91,7 @@ fn refresh_auto_theme_menu_item() {
             solar_settings.auto_theme_enabled,
         );
 
-        let _ = handles.auto_theme.set_text(label);
+        let _ = handles.auto_theme.set_text(&label);
         let _ = handles.auto_theme.set_checked(solar_settings.auto_theme_enabled);
         let _ = handles.auto_theme.set_enabled(true);
     }
@@ -108,12 +108,12 @@ pub fn refresh_tray_language() -> Result<()> {
     };
 
     if let Some(handles) = handles_guard.as_ref() {
-        handles.open_main.set_text(texts.open_main)?;
-        handles.theme_dark.set_text(texts.dark_mode)?;
-        handles.theme_light.set_text(texts.light_mode)?;
+        handles.open_main.set_text(&texts.open_main)?;
+        handles.theme_dark.set_text(&texts.dark_mode)?;
+        handles.theme_light.set_text(&texts.light_mode)?;
         if let Ok(solar_settings) = crate::commands::get_solar_settings() {
             let is_configured = solar_settings.location.is_some();
-            handles.auto_theme.set_text(i18n::tray_auto_theme_label(
+            handles.auto_theme.set_text(&i18n::tray_auto_theme_label(
                 &current_language,
                 is_configured,
                 solar_settings.auto_theme_enabled,
@@ -123,10 +123,10 @@ pub fn refresh_tray_language() -> Result<()> {
                 .set_checked(solar_settings.auto_theme_enabled)?;
         }
         handles.language_menu.set_text(i18n::language_menu_label(
-            texts.language_menu,
+            &texts.language_menu,
             &current_language,
         ))?;
-        handles.language_auto.set_text(texts.language_auto)?;
+        handles.language_auto.set_text(&texts.language_auto)?;
         handles
             .language_auto
             .set_checked(preference.eq_ignore_ascii_case(i18n::LANGUAGE_PREFERENCE_AUTO))?;
@@ -136,7 +136,7 @@ pub fn refresh_tray_language() -> Result<()> {
             item.set_text(i18n::language_option_label(language))?;
         }
 
-        handles.quit.set_text(texts.quit)?;
+        handles.quit.set_text(&texts.quit)?;
     }
 
     Ok(())
@@ -147,7 +147,7 @@ fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
     let current_language = language_settings.resolved;
     let texts = i18n::tray_texts(&current_language);
 
-    let open_main = MenuItem::with_id(app, MENU_OPEN_MAIN, texts.open_main, true, None::<&str>)?;
+    let open_main = MenuItem::with_id(app, MENU_OPEN_MAIN, &texts.open_main, true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
 
     let current_state = crate::commands::get_theme_state().unwrap_or(ThemeState {
@@ -165,7 +165,7 @@ fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
     let theme_dark = CheckMenuItem::with_id(
         app,
         MENU_THEME_DARK,
-        texts.dark_mode,
+        &texts.dark_mode,
         !dark_selected,
         dark_selected,
         None::<&str>,
@@ -173,7 +173,7 @@ fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
     let theme_light = CheckMenuItem::with_id(
         app,
         MENU_THEME_LIGHT,
-        texts.light_mode,
+        &texts.light_mode,
         dark_selected,
         !dark_selected,
         None::<&str>,
@@ -182,7 +182,7 @@ fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
     let auto_theme = CheckMenuItem::with_id(
         app,
         MENU_AUTO_THEME,
-        i18n::tray_auto_theme_label(
+        &i18n::tray_auto_theme_label(
             &current_language,
             solar_settings.location.is_some(),
             solar_settings.auto_theme_enabled,
@@ -195,7 +195,7 @@ fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
     let language_auto = CheckMenuItem::with_id(
         app,
         MENU_LANGUAGE_AUTO,
-        texts.language_auto,
+        &texts.language_auto,
         true,
         language_preference.eq_ignore_ascii_case(i18n::LANGUAGE_PREFERENCE_AUTO),
         None::<&str>,
@@ -225,13 +225,13 @@ fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
     let language_menu = Submenu::with_id_and_items(
         app,
         MENU_LANGUAGE_MENU,
-        i18n::language_menu_label(texts.language_menu, &current_language),
+        i18n::language_menu_label(&texts.language_menu, &current_language),
         true,
         &language_item_refs,
     )?;
 
     let separator_bottom = PredefinedMenuItem::separator(app)?;
-    let quit = MenuItem::with_id(app, MENU_QUIT, texts.quit, true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, MENU_QUIT, &texts.quit, true, None::<&str>)?;
     let menu = Menu::with_items(
         app,
         &[
@@ -324,7 +324,7 @@ pub fn setup_tray(app: &AppHandle) -> Result<()> {
                         let message = i18n::auto_theme_configuration_required_message(&language);
                         let _ = app.emit(
                             crate::commands::AUTO_THEME_CONFIGURATION_REQUIRED_EVENT,
-                            message,
+                            &message,
                         );
                         refresh_auto_theme_menu_item();
                         return;

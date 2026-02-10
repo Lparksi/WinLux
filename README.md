@@ -69,6 +69,7 @@ The app UI will open as a desktop window, and can also be controlled from the tr
 | `bun run dev` | Run Vite frontend only (`http://localhost:5173`) |
 | `bun run build` | Type-check and build frontend assets into `dist/` |
 | `bun run typecheck` | Run TypeScript checks only |
+| `bun run i18n:check` | Validate locale keys and placeholders |
 | `bun run tauri:dev` | Run the Tauri desktop app in development mode |
 | `bun run tauri:build` | Build desktop distributables (NSIS target) |
 | `bun run release` | Build release with version inferred from latest Git tag |
@@ -100,6 +101,7 @@ cargo test -p winlux
 - Supported language options (30):
   - English, Simplified Chinese, Traditional Chinese, Japanese, Korean, Thai, Vietnamese, Indonesian, French, German, Italian, Spanish (Spain), Spanish (International), Portuguese (Portugal), Portuguese (Brazil), Russian, Polish, Turkish, Ukrainian, Czech, Hungarian, Greek, Bulgarian, Romanian, Arabic, Dutch, Danish, Finnish, Norwegian, Swedish
 - Main-window UI strings are localized for all supported language options above.
+- Tray menu strings are loaded from `src/locales/tray-texts.json`.
 - Language preference is stored at:
   - `HKCU\Software\WinLux\LanguagePreference`
 

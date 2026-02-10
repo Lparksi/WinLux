@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "typecheck": "tsc --noEmit",
+    "i18n:check": "node scripts/check-i18n.mjs",
     "preview": "vite preview",
     "icon:gen": "bun scripts/generate-windows-icons.mjs",
     "tauri": "tauri",

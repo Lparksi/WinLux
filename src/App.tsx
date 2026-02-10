@@ -27,6 +27,7 @@ import {
   getLanguageMenuLabel,
   getLanguageOptionLabel,
   getMessages,
+  translate,
 } from './lib/i18n'
 
 type ThemeBadgeTone = 'neutral' | 'good' | 'mix'
@@ -400,56 +401,111 @@ function App() {
   const resolvedLanguageDisplayName = getLanguageDisplayName(currentLanguage)
   const languagePreference = languageSettings?.preference ?? 'auto'
   const autoThemeStatusText =
-    solarSettings?.auto_theme_enabled ? '已启用（将按日出/日落自动切换）' : '未启用'
-  const savedLocationText = solarSettings?.location?.display_name ?? '未保存'
+    solarSettings?.auto_theme_enabled
+      ? translate(currentLanguage, 'solar.status_enabled')
+      : translate(currentLanguage, 'solar.status_disabled')
+  const savedLocationText =
+    solarSettings?.location?.display_name ??
+    translate(currentLanguage, 'solar.saved_location_empty')
   const savedCoordinatesText = solarSettings?.location
-    ? `保存坐标：纬度 ${solarSettings.location.latitude.toFixed(6)}，经度 ${solarSettings.location.longitude.toFixed(6)}`
+    ? translate(currentLanguage, 'solar.saved_coordinates', {
+        latitude: solarSettings.location.latitude.toFixed(6),
+        longitude: solarSettings.location.longitude.toFixed(6),
+      })
     : null
   const todaySunTimesText = !solarSettings?.location
-    ? '本日（日出/日落）：请先保存地址'
+    ? translate(currentLanguage, 'solar.today_prompt_save_address')
     : todaySunTimesLoading
-      ? '本日（日出/日落）：读取中…'
+      ? translate(currentLanguage, 'solar.today_loading')
       : todaySunTimes
-        ? `本日 ${todaySunTimes.date}：日出 ${formatLocalClock(todaySunTimes.sunrise_local)}，日落 ${formatLocalClock(todaySunTimes.sunset_local)}`
-        : '本日（日出/日落）：读取失败'
+        ? translate(currentLanguage, 'solar.today_result', {
+            date: todaySunTimes.date,
+            sunrise: formatLocalClock(todaySunTimes.sunrise_local),
+            sunset: formatLocalClock(todaySunTimes.sunset_local),
+          })
+        : translate(currentLanguage, 'solar.today_failed')
   const sunTimeDetails = sunTimesResult
     ? [
-        { label: '地址（输入）', value: sunTimesResult.address },
-        { label: '地址（解析）', value: sunTimesResult.display_name },
         {
-          label: '坐标',
-          value: `纬度 ${sunTimesResult.latitude.toFixed(6)}，经度 ${sunTimesResult.longitude.toFixed(6)}`,
-        },
-        { label: '日期', value: sunTimesResult.date },
-        { label: '日出（本地）', value: sunTimesResult.sunrise_local },
-        { label: '日落（本地）', value: sunTimesResult.sunset_local },
-        { label: '日出（UTC）', value: sunTimesResult.sunrise_utc },
-        { label: '日落（UTC）', value: sunTimesResult.sunset_utc },
-        { label: '日出 Unix', value: String(sunTimesResult.sunrise_unix) },
-        { label: '日落 Unix', value: String(sunTimesResult.sunset_unix) },
-        {
-          label: '白昼长度',
-          value: `${sunTimesResult.day_length_hms}（${sunTimesResult.day_length_seconds} 秒）`,
+          label: translate(currentLanguage, 'solar.detail.input_address'),
+          value: sunTimesResult.address,
         },
         {
-          label: '当前光照状态',
-          value: sunTimesResult.is_daylight ? '白天' : '夜晚',
+          label: translate(currentLanguage, 'solar.detail.parsed_address'),
+          value: sunTimesResult.display_name,
         },
         {
-          label: '推荐主题',
-          value: sunTimesResult.recommended_theme === 'light' ? '浅色' : '深色',
+          label: translate(currentLanguage, 'solar.detail.coordinates'),
+          value: translate(currentLanguage, 'solar.detail.coordinates_value', {
+            latitude: sunTimesResult.latitude.toFixed(6),
+            longitude: sunTimesResult.longitude.toFixed(6),
+          }),
+        },
+        { label: translate(currentLanguage, 'solar.detail.date'), value: sunTimesResult.date },
+        {
+          label: translate(currentLanguage, 'solar.detail.sunrise_local'),
+          value: sunTimesResult.sunrise_local,
         },
         {
-          label: '下次切换',
-          value: `${sunTimesResult.next_transition === 'sunrise' ? '日出' : '日落'}（本地：${sunTimesResult.next_transition_local}）`,
+          label: translate(currentLanguage, 'solar.detail.sunset_local'),
+          value: sunTimesResult.sunset_local,
         },
         {
-          label: '下次切换（UTC）',
+          label: translate(currentLanguage, 'solar.detail.sunrise_utc'),
+          value: sunTimesResult.sunrise_utc,
+        },
+        {
+          label: translate(currentLanguage, 'solar.detail.sunset_utc'),
+          value: sunTimesResult.sunset_utc,
+        },
+        {
+          label: translate(currentLanguage, 'solar.detail.sunrise_unix'),
+          value: String(sunTimesResult.sunrise_unix),
+        },
+        {
+          label: translate(currentLanguage, 'solar.detail.sunset_unix'),
+          value: String(sunTimesResult.sunset_unix),
+        },
+        {
+          label: translate(currentLanguage, 'solar.detail.day_length'),
+          value: translate(currentLanguage, 'solar.detail.day_length_value', {
+            duration: sunTimesResult.day_length_hms,
+            seconds: sunTimesResult.day_length_seconds,
+          }),
+        },
+        {
+          label: translate(currentLanguage, 'solar.detail.light_state'),
+          value: sunTimesResult.is_daylight
+            ? translate(currentLanguage, 'solar.detail.light_state_day')
+            : translate(currentLanguage, 'solar.detail.light_state_night'),
+        },
+        {
+          label: translate(currentLanguage, 'solar.detail.recommended_theme'),
+          value:
+            sunTimesResult.recommended_theme === 'light'
+              ? translate(currentLanguage, 'solar.detail.theme_light')
+              : translate(currentLanguage, 'solar.detail.theme_dark'),
+        },
+        {
+          label: translate(currentLanguage, 'solar.detail.next_transition'),
+          value: translate(currentLanguage, 'solar.detail.next_transition_value', {
+            transition:
+              sunTimesResult.next_transition === 'sunrise'
+                ? translate(currentLanguage, 'solar.detail.transition_sunrise')
+                : translate(currentLanguage, 'solar.detail.transition_sunset'),
+            local: sunTimesResult.next_transition_local,
+          }),
+        },
+        {
+          label: translate(currentLanguage, 'solar.detail.next_transition_utc'),
           value: sunTimesResult.next_transition_utc,
         },
         {
-          label: '距下次切换',
-          value: `${formatDuration(sunTimesResult.seconds_until_next_transition)}（${sunTimesResult.seconds_until_next_transition} 秒）`,
+          label: translate(currentLanguage, 'solar.detail.until_next_transition'),
+          value: translate(currentLanguage, 'solar.detail.until_next_transition_value', {
+            duration: formatDuration(sunTimesResult.seconds_until_next_transition),
+            seconds: sunTimesResult.seconds_until_next_transition,
+          }),
         },
       ]
     : []
@@ -573,7 +629,7 @@ function App() {
         <section className="panel infoPanel">
           <p className="hint">{messages.hideToTrayHint}</p>
           <p className="hint">
-            地图数据版权：
+            {translate(currentLanguage, 'info.osm_copyright_prefix')}
             <a
               className="hintLink"
               href="https://www.openstreetmap.org/copyright"
@@ -588,10 +644,10 @@ function App() {
         </section>
 
         <details className="details detailsPrimary">
-          <summary>地址日照与自动切换</summary>
+          <summary>{translate(currentLanguage, 'solar.section_title')}</summary>
           <div className="detailsBody">
             <div className="kv codeGrid">
-              <span className="label">自动浅色/深色切换</span>
+              <span className="label">{translate(currentLanguage, 'solar.auto_theme_toggle')}</span>
               <div className="switchRow">
                 <button
                   type="button"
@@ -601,7 +657,7 @@ function App() {
                     void toggleAutoTheme(true)
                   }}
                 >
-                  启用
+                  {translate(currentLanguage, 'common.enable')}
                 </button>
                 <button
                   type="button"
@@ -611,7 +667,7 @@ function App() {
                     void toggleAutoTheme(false)
                   }}
                 >
-                  停用
+                  {translate(currentLanguage, 'common.disable')}
                 </button>
                 <button
                   type="button"
@@ -621,11 +677,21 @@ function App() {
                     void refreshSolarSettings()
                   }}
                 >
-                  {solarSettingsLoading ? '读取中…' : '刷新设置'}
+                  {solarSettingsLoading
+                    ? translate(currentLanguage, 'common.loading')
+                    : translate(currentLanguage, 'solar.refresh_settings')}
                 </button>
               </div>
-              <code className="code">当前状态：{autoThemeStatusText}</code>
-              <code className="code">已保存地址：{savedLocationText}</code>
+              <code className="code">
+                {translate(currentLanguage, 'solar.current_status')}
+                {translate(currentLanguage, 'common.kv_separator')}
+                {autoThemeStatusText}
+              </code>
+              <code className="code">
+                {translate(currentLanguage, 'solar.saved_address')}
+                {translate(currentLanguage, 'common.kv_separator')}
+                {savedLocationText}
+              </code>
               {savedCoordinatesText ? <code className="code">{savedCoordinatesText}</code> : null}
               <code className="code">{todaySunTimesText}</code>
             </div>
@@ -633,13 +699,13 @@ function App() {
             <div className="inputGrid">
               <div className="field">
                 <label className="label" htmlFor="address-input">
-                  地址
+                  {translate(currentLanguage, 'solar.address_label')}
                 </label>
                 <input
                   id="address-input"
                   type="text"
                   value={addressInput}
-                  placeholder="例如：上海市浦东新区"
+                  placeholder={translate(currentLanguage, 'solar.address_placeholder')}
                   onChange={(event) => {
                     setAddressInput(event.target.value)
                   }}
@@ -648,7 +714,7 @@ function App() {
 
               <div className="field">
                 <label className="label" htmlFor="date-input">
-                  日期（YYYY-MM-DD）
+                  {translate(currentLanguage, 'solar.date_label')}
                 </label>
                 <input
                   id="date-input"
@@ -670,7 +736,9 @@ function App() {
                   void resolveAddress()
                 }}
               >
-                {geocodeLoading ? '解析中…' : '解析地址'}
+                {geocodeLoading
+                  ? translate(currentLanguage, 'common.resolving')
+                  : translate(currentLanguage, 'solar.action.resolve_address')}
               </button>
 
               <button
@@ -681,7 +749,9 @@ function App() {
                   void saveAddress()
                 }}
               >
-                {geocodeLoading ? '保存中…' : '保存地址'}
+                {geocodeLoading
+                  ? translate(currentLanguage, 'common.saving')
+                  : translate(currentLanguage, 'solar.action.save_address')}
               </button>
 
               <button
@@ -692,7 +762,9 @@ function App() {
                   void resolveSunTimes()
                 }}
               >
-                {sunLoading ? '计算中…' : '查询日出日落'}
+                {sunLoading
+                  ? translate(currentLanguage, 'common.calculating')
+                  : translate(currentLanguage, 'solar.action.query_sun_times')}
               </button>
 
               <button
@@ -703,15 +775,17 @@ function App() {
                   void resolveSavedSunTimes()
                 }}
               >
-                {sunLoading ? '计算中…' : '按已保存地址查询'}
+                {sunLoading
+                  ? translate(currentLanguage, 'common.calculating')
+                  : translate(currentLanguage, 'solar.action.query_saved_location')}
               </button>
 
               <button
                 type="button"
                 className="btn btnGhost btnIcon"
                 disabled={sunLoading || geocodeLoading}
-                aria-label="清空结果"
-                title="清空结果"
+                aria-label={translate(currentLanguage, 'solar.action.clear_results')}
+                title={translate(currentLanguage, 'solar.action.clear_results')}
                 onClick={() => {
                   setSolarError(null)
                   setGeocodeResult(null)
@@ -726,12 +800,14 @@ function App() {
 
             {geocodeResult ? (
               <div className="resultBlock">
-                <span className="label">地址解析结果</span>
+                <span className="label">{translate(currentLanguage, 'solar.result.geocode')}</span>
                 <div className="resultList">
                   <code className="code">{geocodeResult.display_name}</code>
                   <code className="code">
-                    纬度：{geocodeResult.latitude.toFixed(6)}，经度：
-                    {geocodeResult.longitude.toFixed(6)}
+                    {translate(currentLanguage, 'solar.label.latitude_longitude', {
+                      latitude: geocodeResult.latitude.toFixed(6),
+                      longitude: geocodeResult.longitude.toFixed(6),
+                    })}
                   </code>
                 </div>
               </div>
@@ -739,11 +815,13 @@ function App() {
 
             {sunTimesResult ? (
               <div className="resultBlock">
-                <span className="label">日出日落结果</span>
+                <span className="label">{translate(currentLanguage, 'solar.result.sun_times')}</span>
                 <div className="resultList">
                   {sunTimeDetails.map((item) => (
                     <code key={item.label} className="code">
-                      {item.label}：{item.value}
+                      {item.label}
+                      {translate(currentLanguage, 'common.kv_separator')}
+                      {item.value}
                     </code>
                   ))}
                 </div>
