@@ -13,10 +13,10 @@
     "windows": [
       {
         "title": "WinLux",
-        "width": 560,
-        "height": 420,
-        "minWidth": 420,
-        "minHeight": 340,
+        "width": 920,
+        "height": 720,
+        "minWidth": 760,
+        "minHeight": 560,
         "resizable": true,
         "fullscreen": false
       }

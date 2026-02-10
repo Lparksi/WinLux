@@ -350,6 +350,36 @@ pub fn tray_texts(language: &str) -> TrayTexts {
     }
 }
 
+pub fn tray_auto_theme_label(language: &str, configured: bool, enabled: bool) -> &'static str {
+    match language {
+        "SimpChinese" => {
+            if !configured {
+                "自动切换：未配置（点击前往设置）"
+            } else if enabled {
+                "自动切换：开启"
+            } else {
+                "自动切换：关闭"
+            }
+        }
+        _ => {
+            if !configured {
+                "Auto Switch: Not Configured (Click to Set Up)"
+            } else if enabled {
+                "Auto Switch: On"
+            } else {
+                "Auto Switch: Off"
+            }
+        }
+    }
+}
+
+pub fn auto_theme_configuration_required_message(language: &str) -> &'static str {
+    match language {
+        "SimpChinese" => "请先在“地址日照与自动切换”中保存地址，再启用自动切换。",
+        _ => "Please save an address in Solar Settings before enabling auto switch.",
+    }
+}
+
 pub fn language_menu_label(language_menu: &str, current_language: &str) -> String {
     if current_language.eq_ignore_ascii_case("English")
         || language_menu.eq_ignore_ascii_case("Language")

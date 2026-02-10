@@ -12,6 +12,8 @@ fn main() {
         .setup(|app| {
             tray::setup_tray(&app.handle())?;
             tray::refresh_tray_language()?;
+            commands::start_auto_theme_worker(app.handle().clone());
+            let _ = commands::apply_auto_theme_for_app(&app.handle());
 
             if let Some(window) = app.get_webview_window("main") {
                 if let Ok(theme_state) = commands::get_theme_state() {
@@ -26,6 +28,13 @@ fn main() {
             commands::set_theme_state,
             commands::get_language_settings,
             commands::set_language_preference,
+            commands::geocode_address,
+            commands::get_sun_times_by_address,
+            commands::get_sun_times_by_saved_location,
+            commands::get_solar_settings,
+            commands::save_solar_location,
+            commands::set_auto_theme_enabled,
+            commands::open_external_url,
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {

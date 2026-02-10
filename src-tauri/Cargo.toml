@@ -11,6 +11,10 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = ["devtools", "tray-icon", "image-ico"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+chrono = "0.4"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+sunrise = "2"
+tokio = { version = "1", features = ["sync", "time"] }
 winreg = "0.52"
 windows-sys = { version = "0.52", features = [
   "Win32_Foundation",
