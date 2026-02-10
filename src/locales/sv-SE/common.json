@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Ogiltigt longitudformat: {source}",
   "errors.language.unsupported": "Språket stöds inte: {preference}",
   "errors.language.preference_write_failed": "Kunde inte spara språkpreferens: {source}",
-  "startup.toggle": "K?r vid uppstart",
+  "startup.toggle": "Kör vid uppstart",
   "startup.refresh": "Uppdatera uppstartsstatus",
   "startup.current_status": "Uppstartsstatus",
   "startup.status_enabled": "Aktiverad",
   "startup.status_disabled": "Inaktiverad",
-  "tray.startup": "K?r vid uppstart"
+  "tray.startup": "Kör vid uppstart"
 }

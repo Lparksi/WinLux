@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Formato longitudine non valido: {source}",
   "errors.language.unsupported": "Lingua non supportata: {preference}",
   "errors.language.preference_write_failed": "Impossibile salvare la preferenza della lingua: {source}",
-  "startup.toggle": "Esegui all?avvio",
+  "startup.toggle": "Esegui all'avvio",
   "startup.refresh": "Aggiorna stato avvio",
   "startup.current_status": "Stato avvio",
   "startup.status_enabled": "Abilitato",
   "startup.status_disabled": "Disabilitato",
-  "tray.startup": "Esegui all?avvio"
+  "tray.startup": "Esegui all'avvio"
 }

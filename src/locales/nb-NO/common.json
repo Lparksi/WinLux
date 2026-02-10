@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Ugyldig lengdegradsformat: {source}",
   "errors.language.unsupported": "Ikke støttet språk: {preference}",
   "errors.language.preference_write_failed": "Kunne ikke lagre språkpreferanse: {source}",
-  "startup.toggle": "Kj?r ved oppstart",
+  "startup.toggle": "Kjør ved oppstart",
   "startup.refresh": "Oppdater oppstartsstatus",
   "startup.current_status": "Oppstartsstatus",
   "startup.status_enabled": "Aktivert",
   "startup.status_disabled": "Deaktivert",
-  "tray.startup": "Kj?r ved oppstart"
+  "tray.startup": "Kjør ved oppstart"
 }

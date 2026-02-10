@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "経度の形式が正しくありません: {source}",
   "errors.language.unsupported": "未対応の言語です: {preference}",
   "errors.language.preference_write_failed": "言語設定の保存に失敗しました: {source}",
-  "startup.toggle": "?????????",
-  "startup.refresh": "????????????",
-  "startup.current_status": "?????????",
-  "startup.status_enabled": "??",
-  "startup.status_disabled": "??",
-  "tray.startup": "??????????"
+  "startup.toggle": "起動時に実行",
+  "startup.refresh": "起動状態を更新",
+  "startup.current_status": "起動状態",
+  "startup.status_enabled": "有効",
+  "startup.status_disabled": "無効",
+  "tray.startup": "起動時に実行"
 }

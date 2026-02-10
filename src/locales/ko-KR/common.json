@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "잘못된 경도 형식입니다: {source}",
   "errors.language.unsupported": "지원되지 않는 언어입니다: {preference}",
   "errors.language.preference_write_failed": "언어 설정 저장에 실패했습니다: {source}",
-  "startup.toggle": "?? ? ?? ??",
-  "startup.refresh": "?? ?? ????",
-  "startup.current_status": "?? ?? ?? ??",
-  "startup.status_enabled": "??",
-  "startup.status_disabled": "?? ? ?",
-  "tray.startup": "?? ? ?? ??"
+  "startup.toggle": "시작 시 실행",
+  "startup.refresh": "시작 상태 새로고침",
+  "startup.current_status": "시작 상태",
+  "startup.status_enabled": "활성화됨",
+  "startup.status_disabled": "비활성화됨",
+  "tray.startup": "시작 시 실행"
 }

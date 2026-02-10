@@ -98,9 +98,9 @@
   "errors.language.unsupported": "Nieobsługiwany język: {preference}",
   "errors.language.preference_write_failed": "Nie udało się zapisać preferencji języka: {source}",
   "startup.toggle": "Uruchamiaj przy starcie",
-  "startup.refresh": "Od?wie? status uruchamiania",
+  "startup.refresh": "Odśwież status uruchamiania",
   "startup.current_status": "Status uruchamiania",
-  "startup.status_enabled": "W??czone",
-  "startup.status_disabled": "Wy??czone",
+  "startup.status_enabled": "Włączone",
+  "startup.status_disabled": "Wyłączone",
   "tray.startup": "Uruchamiaj przy starcie"
 }

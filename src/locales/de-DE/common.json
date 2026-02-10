@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Ungültiges Längengradformat: {source}",
   "errors.language.unsupported": "Nicht unterstützte Sprache: {preference}",
   "errors.language.preference_write_failed": "Spracheinstellung konnte nicht gespeichert werden: {source}",
-  "startup.toggle": "Beim Start ausf?hren",
+  "startup.toggle": "Beim Start ausführen",
   "startup.refresh": "Startstatus aktualisieren",
   "startup.current_status": "Startstatus",
   "startup.status_enabled": "Aktiviert",
   "startup.status_disabled": "Deaktiviert",
-  "tray.startup": "Beim Start ausf?hren"
+  "tray.startup": "Beim Start ausführen"
 }

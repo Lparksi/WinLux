@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Format de longitudine invalid: {source}",
   "errors.language.unsupported": "Limbă neacceptată: {preference}",
   "errors.language.preference_write_failed": "Nu s-a putut salva preferința de limbă: {source}",
-  "startup.toggle": "Ruleaz? la pornire",
-  "startup.refresh": "Actualizeaz? starea de pornire",
+  "startup.toggle": "Rulează la pornire",
+  "startup.refresh": "Actualizează starea de pornire",
   "startup.current_status": "Stare la pornire",
   "startup.status_enabled": "Activat",
   "startup.status_disabled": "Dezactivat",
-  "tray.startup": "Ruleaz? la pornire"
+  "tray.startup": "Rulează la pornire"
 }

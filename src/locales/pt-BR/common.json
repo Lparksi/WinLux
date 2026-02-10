@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Formato de longitude inválido: {source}",
   "errors.language.unsupported": "Idioma não suportado: {preference}",
   "errors.language.preference_write_failed": "Falha ao salvar preferência de idioma: {source}",
-  "startup.toggle": "Executar na inicializa??o",
-  "startup.refresh": "Atualizar status de inicializa??o",
-  "startup.current_status": "Status de inicializa??o",
+  "startup.toggle": "Executar na inicialização",
+  "startup.refresh": "Atualizar status de inicialização",
+  "startup.current_status": "Status de inicialização",
   "startup.status_enabled": "Ativado",
   "startup.status_disabled": "Desativado",
-  "tray.startup": "Executar na inicializa??o"
+  "tray.startup": "Executar na inicialização"
 }

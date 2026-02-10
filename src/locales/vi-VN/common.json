@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Định dạng kinh độ không hợp lệ: {source}",
   "errors.language.unsupported": "Ngôn ngữ không được hỗ trợ: {preference}",
   "errors.language.preference_write_failed": "Không thể lưu tùy chọn ngôn ngữ: {source}",
-  "startup.toggle": "Ch?y khi kh?i ??ng",
-  "startup.refresh": "L?m m?i tr?ng th?i kh?i ??ng",
-  "startup.current_status": "Tr?ng th?i kh?i ??ng",
-  "startup.status_enabled": "?? b?t",
-  "startup.status_disabled": "?? t?t",
-  "tray.startup": "Ch?y khi kh?i ??ng"
+  "startup.toggle": "Chạy khi khởi động",
+  "startup.refresh": "Làm mới trạng thái khởi động",
+  "startup.current_status": "Trạng thái khởi động",
+  "startup.status_enabled": "Đã bật",
+  "startup.status_disabled": "Đã tắt",
+  "tray.startup": "Chạy khi khởi động"
 }

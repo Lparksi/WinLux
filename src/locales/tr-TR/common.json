@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Geçersiz boylam biçimi: {source}",
   "errors.language.unsupported": "Desteklenmeyen dil: {preference}",
   "errors.language.preference_write_failed": "Dil tercihi kaydedilemedi: {source}",
-  "startup.toggle": "Ba?lang??ta ?al??t?r",
-  "startup.refresh": "Ba?lang?? durumunu yenile",
-  "startup.current_status": "Ba?lang?? durumu",
+  "startup.toggle": "Başlangıçta çalıştır",
+  "startup.refresh": "Başlangıç durumunu yenile",
+  "startup.current_status": "Başlangıç durumu",
   "startup.status_enabled": "Etkin",
-  "startup.status_disabled": "Devre d???",
-  "tray.startup": "Ba?lang??ta ?al??t?r"
+  "startup.status_disabled": "Devre dışı",
+  "tray.startup": "Başlangıçta çalıştır"
 }

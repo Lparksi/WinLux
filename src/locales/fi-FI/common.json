@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Virheellinen pituusasteen muoto: {source}",
   "errors.language.unsupported": "Ei tuettu kieli: {preference}",
   "errors.language.preference_write_failed": "Kieliasetuksen tallentaminen epäonnistui: {source}",
-  "startup.toggle": "K?ynnist? k?ynnistyksess?",
-  "startup.refresh": "P?ivit? k?ynnistystila",
-  "startup.current_status": "K?ynnistystila",
-  "startup.status_enabled": "K?yt?ss?",
-  "startup.status_disabled": "Pois k?yt?st?",
-  "tray.startup": "K?ynnist? k?ynnistyksess?"
+  "startup.toggle": "Käynnistä käynnistyksessä",
+  "startup.refresh": "Päivitä käynnistystila",
+  "startup.current_status": "Käynnistystila",
+  "startup.status_enabled": "Käytössä",
+  "startup.status_disabled": "Pois käytöstä",
+  "tray.startup": "Käynnistä käynnistyksessä"
 }

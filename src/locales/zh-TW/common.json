@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "經度格式錯誤：{source}",
   "errors.language.unsupported": "不支援的語言：{preference}",
   "errors.language.preference_write_failed": "寫入語言偏好失敗：{source}",
-  "startup.toggle": "????",
-  "startup.refresh": "??????????",
-  "startup.current_status": "??????",
-  "startup.status_enabled": "???",
-  "startup.status_disabled": "???",
-  "tray.startup": "????"
+  "startup.toggle": "開機自啟",
+  "startup.refresh": "刷新啟動狀態",
+  "startup.current_status": "啟動狀態",
+  "startup.status_enabled": "已啟用",
+  "startup.status_disabled": "已停用",
+  "tray.startup": "開機自啟"
 }

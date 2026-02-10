@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Érvénytelen hosszúsági formátum: {source}",
   "errors.language.unsupported": "Nem támogatott nyelv: {preference}",
   "errors.language.preference_write_failed": "A nyelvi beállítás mentése sikertelen: {source}",
-  "startup.toggle": "Ind?t?s rendszerindul?skor",
-  "startup.refresh": "Ind?t?si ?llapot friss?t?se",
-  "startup.current_status": "Ind?t?si ?llapot",
-  "startup.status_enabled": "Enged?lyezve",
+  "startup.toggle": "Indítás rendszerinduláskor",
+  "startup.refresh": "Indítási állapot frissítése",
+  "startup.current_status": "Indítási állapot",
+  "startup.status_enabled": "Engedélyezve",
   "startup.status_disabled": "Letiltva",
-  "tray.startup": "Ind?t?s rendszerindul?skor"
+  "tray.startup": "Indítás rendszerinduláskor"
 }

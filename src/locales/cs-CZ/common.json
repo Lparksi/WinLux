@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Neplatný formát zeměpisné délky: {source}",
   "errors.language.unsupported": "Nepodporovaný jazyk: {preference}",
   "errors.language.preference_write_failed": "Nepodařilo se uložit jazykovou předvolbu: {source}",
-  "startup.toggle": "Spustit p?i startu",
-  "startup.refresh": "Obnovit stav spou?t?n?",
-  "startup.current_status": "Stav spou?t?n?",
+  "startup.toggle": "Spustit při startu",
+  "startup.refresh": "Obnovit stav spouštění",
+  "startup.current_status": "Stav spouštění",
   "startup.status_enabled": "Zapnuto",
   "startup.status_disabled": "Vypnuto",
-  "tray.startup": "Spustit p?i startu"
+  "tray.startup": "Spustit při startu"
 }

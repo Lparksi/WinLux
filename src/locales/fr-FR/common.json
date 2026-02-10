@@ -97,10 +97,10 @@
   "errors.geocode.longitude_parse_failed": "Format de longitude invalide : {source}",
   "errors.language.unsupported": "Langue non prise en charge : {preference}",
   "errors.language.preference_write_failed": "Échec de l'enregistrement de la préférence de langue : {source}",
-  "startup.toggle": "Lancer au d?marrage",
-  "startup.refresh": "Actualiser l??tat de d?marrage",
-  "startup.current_status": "?tat au d?marrage",
-  "startup.status_enabled": "Activ?",
-  "startup.status_disabled": "D?sactiv?",
-  "tray.startup": "Lancer au d?marrage"
+  "startup.toggle": "Lancer au démarrage",
+  "startup.refresh": "Actualiser l’état de démarrage",
+  "startup.current_status": "État au démarrage",
+  "startup.status_enabled": "Activé",
+  "startup.status_disabled": "Désactivé",
+  "tray.startup": "Lancer au démarrage"
 }
