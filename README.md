@@ -12,6 +12,7 @@ It lets you quickly switch Windows light/dark themes, stay in the system tray, m
 - [Tech Stack](#tech-stack)
 - [Requirements](#requirements)
 - [Quick Start](#quick-start)
+- [Lazy Window Lifecycle](#lazy-window-lifecycle)
 - [Scripts](#scripts)
 - [Validation](#validation)
 - [Project Structure](#project-structure)
@@ -68,7 +69,14 @@ bun install
 bun run tauri:dev
 ```
 
-The app UI will open as a desktop window, and can also be controlled from the tray icon.
+The app starts without rendering the main window and can be controlled from the tray icon.
+
+## Lazy Window Lifecycle
+
+- On startup, WinLux does not create the main WebView window (tray + background features only).
+- Clicking tray left button or "Open Main Window" creates and shows the UI on demand.
+- Closing the main window hides it first, then destroys the window instance after 3 minutes.
+- Reopening from tray within 3 minutes cancels pending destroy and keeps the window alive.
 
 ## Scripts
 

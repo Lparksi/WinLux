@@ -4,7 +4,7 @@ use std::sync::{Mutex, OnceLock};
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::tray::TrayIconBuilder;
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconEvent};
-use tauri::{AppHandle, Emitter, Listener, Manager, Result, Wry};
+use tauri::{AppHandle, Emitter, Listener, Result, Wry};
 
 const TRAY_ID: &str = "main-tray";
 
@@ -37,11 +37,7 @@ fn tray_menu_handles() -> &'static Mutex<Option<TrayMenuHandles>> {
 }
 
 fn open_main_window(app: &AppHandle) {
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.unminimize();
-        let _ = window.show();
-        let _ = window.set_focus();
-    }
+    crate::main_window::open_main_window(app);
 }
 
 fn sync_theme_menu_items(
@@ -165,12 +161,13 @@ pub fn refresh_tray_language() -> Result<()> {
     Ok(())
 }
 
-fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
+fn build_tray_menu(app: &AppHandle, allow_open_main: bool) -> Result<(Menu<Wry>, TrayMenuHandles)> {
     let language_settings = i18n::get_language_settings();
     let current_language = language_settings.resolved;
     let texts = i18n::tray_texts(&current_language);
 
-    let open_main = MenuItem::with_id(app, MENU_OPEN_MAIN, &texts.open_main, true, None::<&str>)?;
+    let open_main =
+        MenuItem::with_id(app, MENU_OPEN_MAIN, &texts.open_main, allow_open_main, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
 
     let current_state = crate::commands::get_theme_state().unwrap_or(ThemeState {
@@ -296,8 +293,8 @@ fn build_tray_menu(app: &AppHandle) -> Result<(Menu<Wry>, TrayMenuHandles)> {
     Ok((menu, handles))
 }
 
-pub fn setup_tray(app: &AppHandle) -> Result<()> {
-    let (menu, handles) = build_tray_menu(app)?;
+pub fn setup_tray(app: &AppHandle, allow_open_main: bool) -> Result<()> {
+    let (menu, handles) = build_tray_menu(app, allow_open_main)?;
 
     if let Ok(mut handles_guard) = tray_menu_handles().lock() {
         *handles_guard = Some(handles);
@@ -332,7 +329,9 @@ pub fn setup_tray(app: &AppHandle) -> Result<()> {
             let menu_id = event.id().as_ref();
             match menu_id {
                 MENU_OPEN_MAIN => {
-                    open_main_window(app);
+                    if allow_open_main {
+                        open_main_window(app);
+                    }
                 }
                 MENU_THEME_DARK => {
                     let next_state = ThemeState {
@@ -359,7 +358,9 @@ pub fn setup_tray(app: &AppHandle) -> Result<()> {
                     };
 
                     if settings.location.is_none() {
-                        open_main_window(app);
+                        if allow_open_main {
+                            open_main_window(app);
+                        }
                         let message = AppError::new("errors.auto_theme_configuration_required");
                         let _ = app.emit(
                             crate::commands::AUTO_THEME_CONFIGURATION_REQUIRED_EVENT,
@@ -406,8 +407,10 @@ pub fn setup_tray(app: &AppHandle) -> Result<()> {
                 button_state: MouseButtonState::Up,
                 ..
             } => {
-                let app = tray.app_handle();
-                open_main_window(&app);
+                if allow_open_main {
+                    let app = tray.app_handle();
+                    open_main_window(&app);
+                }
             }
             TrayIconEvent::Click {
                 button: MouseButton::Right,

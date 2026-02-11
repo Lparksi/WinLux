@@ -12,7 +12,9 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "WinLux",
+        "create": false,
         "width": 920,
         "height": 720,
         "minWidth": 760,

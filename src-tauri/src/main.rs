@@ -2,6 +2,7 @@
 
 mod commands;
 mod i18n;
+mod main_window;
 mod models;
 mod tray;
 
@@ -10,22 +11,12 @@ use tauri::Manager;
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let startup_launch = std::env::args().any(|arg| arg == "--startup");
+            let lite_launch = std::env::args().any(|arg| arg == "--lite");
 
-            tray::setup_tray(&app.handle())?;
+            tray::setup_tray(&app.handle(), !lite_launch)?;
             tray::refresh_tray_language()?;
             commands::start_auto_theme_worker(app.handle().clone());
             let _ = commands::apply_auto_theme_for_app(&app.handle());
-
-            if let Some(window) = app.get_webview_window("main") {
-                if let Ok(theme_state) = commands::get_theme_state() {
-                    commands::apply_window_theme(&window, theme_state.apps);
-                }
-
-                if startup_launch {
-                    let _ = window.hide();
-                }
-            }
 
             Ok(())
         })
@@ -45,9 +36,14 @@ fn main() {
             commands::open_external_url,
         ])
         .on_window_event(|window, event| {
+            if window.label() != main_window::MAIN_WINDOW_LABEL {
+                return;
+            }
+
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close();
                 let _ = window.hide();
+                main_window::schedule_main_window_destroy(window.app_handle().clone());
             }
         })
         .run(tauri::generate_context!())
