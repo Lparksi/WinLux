@@ -158,7 +158,7 @@ jobs:
               installer = exeAssets[0];
             }
 
-            let architecture = 'x64';
+            let architecture = '';
             if (/arm64/i.test(installer.name)) {
               architecture = 'arm64';
             } else if (/x86/i.test(installer.name)) {
@@ -173,7 +173,8 @@ jobs:
             core.setOutput('installer_name', installer.name);
             core.setOutput('installer_url', installer.browser_download_url);
             core.setOutput('installer_architecture', architecture);
-            core.info(`Resolved: ${packageId} ${version} -> ${installer.name} (${architecture})`);
+            const archLog = architecture ? architecture : 'auto-detect';
+            core.info(`Resolved: ${packageId} ${version} -> ${installer.name} (${archLog})`);
 
       - name: Guard against overwrite
         id: guard
@@ -312,21 +313,22 @@ jobs:
         run: |
           $packageId = '${{ steps.resolve.outputs.package_identifier }}'
           $version = '${{ steps.resolve.outputs.version }}'
-          $tag = '${{ steps.resolve.outputs.tag }}'
           $installerUrl = '${{ steps.resolve.outputs.installer_url }}'
           $installerArchitecture = '${{ steps.resolve.outputs.installer_architecture }}'
 
           $prTitle = "New version: $packageId version $version"
-          $prBody = "Automated by $env:GITHUB_REPOSITORY from release $tag."
+          $qualifiedInstallerUrl = $installerUrl
+          if ($installerArchitecture) {
+            $qualifiedInstallerUrl = "$installerUrl|$installerArchitecture"
+          }
           $args = @(
-            'update', $packageId,
-            '--urls', $installerUrl,
+            'update',
+            '--urls', $qualifiedInstallerUrl,
             '--version', $version,
-            '--architecture', $installerArchitecture,
             '--submit',
             '--token', $env:WINGETCREATE_TOKEN,
             '--prtitle', $prTitle,
-            '--prbody', $prBody
+            $packageId
           )
 
           $logFile = Join-Path $PWD 'wingetcreate.log'
