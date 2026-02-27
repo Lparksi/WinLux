@@ -1,6 +1,6 @@
 import { execSync, spawn } from 'node:child_process'
 
-const DEFAULT_VERSION = '0.3.1'
+const DEFAULT_VERSION = '0.3.2'
 
 const rawTag = (() => {
   try {

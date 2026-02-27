@@ -266,16 +266,24 @@ Function PageReinstall
     !endif
     ${NSD_OnClick} $R3 PageReinstallUpdateSelection
 
+    ; For upgrades, default to "don't uninstall" on first visit.
+    ; Users can still switch back to uninstall if they want a clean reinstall.
+    ${If} $R0 = 1
+    ${AndIf} $ReinstallPageCheck == ""
+      StrCpy $ReinstallPageCheck 2
+    ${EndIf}
+
     ; Check the first radio button if this the first time
     ; we enter this page or if the second button wasn't
     ; selected the last time we were on this page
     ${If} $ReinstallPageCheck <> 2
       SendMessage $R2 ${BM_SETCHECK} ${BST_CHECKED} 0
+      ${NSD_SetFocus} $R2
     ${Else}
       SendMessage $R3 ${BM_SETCHECK} ${BST_CHECKED} 0
+      ${NSD_SetFocus} $R3
     ${EndIf}
 
-    ${NSD_SetFocus} $R2
     nsDialogs::Show
   ${EndIf}
 FunctionEnd
