@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Automatikus váltás: Nincs beállítva (Kattintson a beállításhoz)",
   "tray.auto_theme.on": "Automatikus váltás: Be",
   "tray.auto_theme.off": "Automatikus váltás: Ki",
+  "tray.sunset_offset.menu": "Éjszakai mód korábbi indítása",
+  "tray.sunset_offset.option": "{minutes} perccel korábban",
+  "tray.sunset_offset.custom": "Egyéni... (jelenlegi: {minutes} perccel korábban)",
   "errors.auto_theme_configuration_required": "Automatikus váltás engedélyezése előtt mentse el a címet a Nap beállításokban.",
   "errors.registry.open_failed": "A rendszerleíró adatbázis megnyitása sikertelen: {source}",
   "errors.registry.write_apps_theme_failed": "Az AppsUseLightTheme írása sikertelen: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Letiltva",
   "tray.startup": "Indítás rendszerinduláskor"
 }
+

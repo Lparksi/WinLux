@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Αυτόματη εναλλαγή: Μη ρυθμισμένη (Κάντε κλικ για ρύθμιση)",
   "tray.auto_theme.on": "Αυτόματη εναλλαγή: Ενεργή",
   "tray.auto_theme.off": "Αυτόματη εναλλαγή: Ανενεργή",
+  "tray.sunset_offset.menu": "Πρόωρη ενεργοποίηση νυχτερινής λειτουργίας",
+  "tray.sunset_offset.option": "{minutes} λεπτά νωρίτερα",
+  "tray.sunset_offset.custom": "Προσαρμογή... (τρέχον: {minutes} λεπτά νωρίτερα)",
   "errors.auto_theme_configuration_required": "Αποθηκεύστε μια διεύθυνση στις Ηλιακές ρυθμίσεις πριν ενεργοποιήσετε την αυτόματη εναλλαγή.",
   "errors.registry.open_failed": "Αποτυχία ανοίγματος μητρώου: {source}",
   "errors.registry.write_apps_theme_failed": "Αποτυχία εγγραφής του AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Ανενεργό",
   "tray.startup": "Εκτέλεση κατά την εκκίνηση"
 }
+

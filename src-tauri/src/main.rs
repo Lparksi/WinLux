@@ -31,6 +31,7 @@ fn main() {
             commands::get_solar_settings,
             commands::save_solar_location,
             commands::set_auto_theme_enabled,
+            commands::set_sunset_offset_minutes,
             commands::get_startup_state,
             commands::set_startup_enabled,
             commands::open_external_url,

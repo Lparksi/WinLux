@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Tự động chuyển: Chưa cấu hình (Nhấp để thiết lập)",
   "tray.auto_theme.on": "Tự động chuyển: Bật",
   "tray.auto_theme.off": "Tự động chuyển: Tắt",
+  "tray.sunset_offset.menu": "Kích hoạt sớm chế độ ban đêm",
+  "tray.sunset_offset.option": "Sớm hơn {minutes} phút",
+  "tray.sunset_offset.custom": "Tùy chỉnh... (hiện tại: sớm hơn {minutes} phút)",
   "errors.auto_theme_configuration_required": "Vui lòng lưu địa chỉ trong Cài đặt Mặt trời trước khi bật tự động chuyển.",
   "errors.registry.open_failed": "Không thể mở registry: {source}",
   "errors.registry.write_apps_theme_failed": "Không thể ghi AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Đã tắt",
   "tray.startup": "Chạy khi khởi động"
 }
+

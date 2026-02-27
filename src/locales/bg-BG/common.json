@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Автоматично превключване: Не е конфигурирано (Щракнете за настройка)",
   "tray.auto_theme.on": "Автоматично превключване: Включено",
   "tray.auto_theme.off": "Автоматично превключване: Изключено",
+  "tray.sunset_offset.menu": "По-ранно включване на нощен режим",
+  "tray.sunset_offset.option": "С {minutes} мин по-рано",
+  "tray.sunset_offset.custom": "По избор... (текущо: с {minutes} мин по-рано)",
   "errors.auto_theme_configuration_required": "Моля, запазете адрес в слънчевите настройки преди да активирате автоматичното превключване.",
   "errors.registry.open_failed": "Неуспешно отваряне на системния регистър: {source}",
   "errors.registry.write_apps_theme_failed": "Неуспешен запис на AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Изключено",
   "tray.startup": "Стартирай при вход"
 }
+

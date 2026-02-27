@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Otomatik geçiş: Yapılandırılmadı (Kurmak için tıklayın)",
   "tray.auto_theme.on": "Otomatik geçiş: Açık",
   "tray.auto_theme.off": "Otomatik geçiş: Kapalı",
+  "tray.sunset_offset.menu": "Gece modu erken tetikleme",
+  "tray.sunset_offset.option": "{minutes} dk önce",
+  "tray.sunset_offset.custom": "Özel... (mevcut: {minutes} dk önce)",
   "errors.auto_theme_configuration_required": "Otomatik geçişi etkinleştirmeden önce Güneş Ayarlarında bir adres kaydedin.",
   "errors.registry.open_failed": "Kayıt defteri açılamadı: {source}",
   "errors.registry.write_apps_theme_failed": "AppsUseLightTheme yazılamadı: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Devre dışı",
   "tray.startup": "Başlangıçta çalıştır"
 }
+

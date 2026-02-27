@@ -188,6 +188,26 @@ pub fn tray_auto_theme_label(language: &str, configured: bool, enabled: bool) ->
     translate_shared(language, "tray.auto_theme.off")
 }
 
+pub fn tray_sunset_offset_menu_label(language: &str) -> String {
+    translate_shared(language, "tray.sunset_offset.menu")
+}
+
+pub fn tray_sunset_offset_option_label(language: &str, minutes: i64) -> String {
+    translate_shared_with_params(
+        language,
+        "tray.sunset_offset.option",
+        &[("minutes", minutes.to_string())],
+    )
+}
+
+pub fn tray_sunset_offset_custom_label(language: &str, minutes: i64) -> String {
+    translate_shared_with_params(
+        language,
+        "tray.sunset_offset.custom",
+        &[("minutes", minutes.to_string())],
+    )
+}
+
 fn translate_shared(language: &str, key: &str) -> String {
     let locale_messages = shared_messages(language);
     let fallback_messages = shared_messages_for_locale("en-US");
@@ -197,6 +217,21 @@ fn translate_shared(language: &str, key: &str) -> String {
         .or_else(|| fallback_messages.get(key))
         .cloned()
         .unwrap_or_else(|| key.to_string())
+}
+
+fn translate_shared_with_params(
+    language: &str,
+    key: &str,
+    params: &[(&str, String)],
+) -> String {
+    let mut message = translate_shared(language, key);
+
+    for (name, value) in params {
+        let token = format!("{{{name}}}");
+        message = message.replace(&token, value);
+    }
+
+    message
 }
 
 fn shared_messages(language: &str) -> &'static HashMap<String, String> {

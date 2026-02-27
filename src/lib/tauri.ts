@@ -26,6 +26,7 @@ export interface GeocodeResult {
 export interface SolarSettings {
   location: GeocodeResult | null
   auto_theme_enabled: boolean
+  sunset_offset_minutes: number
 }
 
 export interface StartupState {
@@ -84,6 +85,10 @@ export const saveSolarLocation = (address: string): Promise<SolarSettings> => {
 
 export const setAutoThemeEnabled = (enabled: boolean): Promise<SolarSettings> => {
   return invoke('set_auto_theme_enabled', { enabled })
+}
+
+export const setSunsetOffsetMinutes = (minutes: number): Promise<SolarSettings> => {
+  return invoke('set_sunset_offset_minutes', { minutes })
 }
 
 export const getStartupState = (): Promise<StartupState> => {

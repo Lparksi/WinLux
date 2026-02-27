@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Automaattinen vaihto: Ei määritetty (Napsauta määrittääksesi)",
   "tray.auto_theme.on": "Automaattinen vaihto: Päällä",
   "tray.auto_theme.off": "Automaattinen vaihto: Pois",
+  "tray.sunset_offset.menu": "Yötilan aikaisempi käynnistys",
+  "tray.sunset_offset.option": "{minutes} min aiemmin",
+  "tray.sunset_offset.custom": "Mukautettu... (nykyinen: {minutes} min aiemmin)",
   "errors.auto_theme_configuration_required": "Tallenna osoite aurinkoasetuksiin ennen automaattisen vaihdon käyttöönottoa.",
   "errors.registry.open_failed": "Rekisterin avaaminen epäonnistui: {source}",
   "errors.registry.write_apps_theme_failed": "AppsUseLightTheme-arvon kirjoittaminen epäonnistui: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Pois käytöstä",
   "tray.startup": "Käynnistä käynnistyksessä"
 }
+

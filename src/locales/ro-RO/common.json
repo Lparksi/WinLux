@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Comutare automată: Neconfigurată (Faceți clic pentru configurare)",
   "tray.auto_theme.on": "Comutare automată: Pornită",
   "tray.auto_theme.off": "Comutare automată: Oprită",
+  "tray.sunset_offset.menu": "Declanșare anticipată mod noapte",
+  "tray.sunset_offset.option": "Cu {minutes} min mai devreme",
+  "tray.sunset_offset.custom": "Personalizat... (curent: cu {minutes} min mai devreme)",
   "errors.auto_theme_configuration_required": "Salvați o adresă în setările solare înainte de a activa comutarea automată.",
   "errors.registry.open_failed": "Nu s-a putut deschide registrul: {source}",
   "errors.registry.write_apps_theme_failed": "Nu s-a putut scrie AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Dezactivat",
   "tray.startup": "Rulează la pornire"
 }
+

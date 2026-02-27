@@ -17,6 +17,7 @@ import {
   openExternalUrl,
   saveSolarLocation,
   setAutoThemeEnabled,
+  setSunsetOffsetMinutes,
   setStartupEnabled,
   setThemeState,
   SolarSettings,
@@ -77,6 +78,10 @@ const formatLocalClock = (dateTimeText: string) => {
   return match ? match[0] : dateTimeText
 }
 
+const SUNSET_OFFSET_MIN = 0
+const SUNSET_OFFSET_MAX = 720
+const SUNSET_OFFSET_PRESETS = [5, 10, 15] as const
+
 function App() {
   const [themeLoading, setThemeLoading] = useState(false)
   const [themeState, setThemeStateLocal] = useState<ThemeState | null>(null)
@@ -93,6 +98,8 @@ function App() {
   const [sunLoading, setSunLoading] = useState(false)
   const [solarSettingsLoading, setSolarSettingsLoading] = useState(false)
   const [autoThemeToggling, setAutoThemeToggling] = useState(false)
+  const [sunsetOffsetSaving, setSunsetOffsetSaving] = useState(false)
+  const [customSunsetOffsetInput, setCustomSunsetOffsetInput] = useState('0')
   const [solarError, setSolarError] = useState<string | null>(null)
   const [geocodeResult, setGeocodeResult] = useState<GeocodeResult | null>(null)
   const [sunTimesResult, setSunTimesResult] = useState<SunTimesResult | null>(null)
@@ -191,7 +198,9 @@ function App() {
       setSolarError(null)
       setSolarSettingsLoading(false)
       setAutoThemeToggling(false)
+      setSunsetOffsetSaving(false)
       void refreshTodaySunTimes(event.payload)
+      setCustomSunsetOffsetInput(String(event.payload.sunset_offset_minutes))
 
       if (event.payload.location) {
         setAddressInput(event.payload.location.address)
@@ -345,6 +354,7 @@ function App() {
     try {
       const settings = await getSolarSettings()
       setSolarSettings(settings)
+      setCustomSunsetOffsetInput(String(settings.sunset_offset_minutes))
       void refreshTodaySunTimes(settings)
 
       if (settings.location) {
@@ -406,6 +416,39 @@ function App() {
     } finally {
       setAutoThemeToggling(false)
     }
+  }
+
+  const updateSunsetOffset = async (minutes: number) => {
+    setSunsetOffsetSaving(true)
+    setSolarError(null)
+    try {
+      const settings = await setSunsetOffsetMinutes(minutes)
+      setSolarSettings(settings)
+      setCustomSunsetOffsetInput(String(settings.sunset_offset_minutes))
+    } catch (error) {
+      setSolarError(toErrorMessage(error, currentLanguage))
+    } finally {
+      setSunsetOffsetSaving(false)
+    }
+  }
+
+  const applyCustomSunsetOffset = async () => {
+    const raw = customSunsetOffsetInput.trim()
+    const isDigitsOnly = /^\d+$/.test(raw)
+    const value = Number.parseInt(raw, 10)
+
+    if (!isDigitsOnly || Number.isNaN(value) || value < SUNSET_OFFSET_MIN || value > SUNSET_OFFSET_MAX) {
+      setSolarError(
+        translate(currentLanguage, 'errors.solar.invalid_sunset_offset_minutes', {
+          min: SUNSET_OFFSET_MIN,
+          max: SUNSET_OFFSET_MAX,
+          value: raw || 'empty',
+        }),
+      )
+      return
+    }
+
+    await updateSunsetOffset(value)
   }
 
   const openOsmCopyright = async () => {
@@ -517,6 +560,7 @@ function App() {
   const startupCurrentStatusText = translate(currentLanguage, 'startup.current_status')
   const startupEnabledText = translate(currentLanguage, 'startup.status_enabled')
   const startupDisabledText = translate(currentLanguage, 'startup.status_disabled')
+  const currentSunsetOffsetMinutes = solarSettings?.sunset_offset_minutes ?? 0
   const sunTimeDetails = sunTimesResult
     ? [
         {
@@ -818,10 +862,65 @@ function App() {
                     : translate(currentLanguage, 'solar.refresh_settings')}
                 </button>
               </div>
+              <span className="label">{translate(currentLanguage, 'solar.night_mode_advance_label')}</span>
+              <div className="switchRow">
+                {SUNSET_OFFSET_PRESETS.map((minutes) => (
+                  <button
+                    key={minutes}
+                    type="button"
+                    className={`btn ${currentSunsetOffsetMinutes === minutes ? 'btnPrimary' : 'btnSecondary'}`}
+                    disabled={solarSettingsLoading || sunsetOffsetSaving || autoThemeToggling}
+                    onClick={() => {
+                      void updateSunsetOffset(minutes)
+                    }}
+                  >
+                    {translate(currentLanguage, 'solar.night_mode_advance_preset_value', { minutes })}
+                  </button>
+                ))}
+              </div>
+              <div className="customOffsetRow">
+                <div className="field">
+                  <label className="label" htmlFor="sunset-offset-input">
+                    {translate(currentLanguage, 'solar.night_mode_advance_custom_label')}
+                  </label>
+                  <input
+                    id="sunset-offset-input"
+                    type="number"
+                    min={SUNSET_OFFSET_MIN}
+                    max={SUNSET_OFFSET_MAX}
+                    step={1}
+                    value={customSunsetOffsetInput}
+                    placeholder={translate(currentLanguage, 'solar.night_mode_advance_preset_value', {
+                      minutes: 30,
+                    })}
+                    onChange={(event) => {
+                      setCustomSunsetOffsetInput(event.target.value)
+                    }}
+                    disabled={solarSettingsLoading || sunsetOffsetSaving || autoThemeToggling}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="btn btnGhost customOffsetApply"
+                  disabled={solarSettingsLoading || sunsetOffsetSaving || autoThemeToggling}
+                  onClick={() => {
+                    void applyCustomSunsetOffset()
+                  }}
+                >
+                  {sunsetOffsetSaving
+                    ? translate(currentLanguage, 'common.saving')
+                    : translate(currentLanguage, 'solar.night_mode_advance_apply')}
+                </button>
+              </div>
               <code className="code">
                 {translate(currentLanguage, 'solar.current_status')}
                 {translate(currentLanguage, 'common.kv_separator')}
                 {autoThemeStatusText}
+              </code>
+              <code className="code">
+                {translate(currentLanguage, 'solar.night_mode_advance_current', {
+                  minutes: currentSunsetOffsetMinutes,
+                })}
               </code>
               <code className="code">
                 {translate(currentLanguage, 'solar.saved_address')}

@@ -12,6 +12,11 @@ const MENU_OPEN_MAIN: &str = "tray_open_main";
 const MENU_THEME_DARK: &str = "tray_theme_dark";
 const MENU_THEME_LIGHT: &str = "tray_theme_light";
 const MENU_AUTO_THEME: &str = "tray_auto_theme";
+const MENU_SUNSET_OFFSET_MENU: &str = "tray_sunset_offset_menu";
+const MENU_SUNSET_OFFSET_5: &str = "tray_sunset_offset_5";
+const MENU_SUNSET_OFFSET_10: &str = "tray_sunset_offset_10";
+const MENU_SUNSET_OFFSET_15: &str = "tray_sunset_offset_15";
+const MENU_SUNSET_OFFSET_CUSTOM: &str = "tray_sunset_offset_custom";
 const MENU_STARTUP: &str = "tray_startup";
 const MENU_LANGUAGE_AUTO: &str = "tray_language_auto";
 const MENU_LANGUAGE_PREFIX: &str = "tray_language_";
@@ -23,6 +28,11 @@ struct TrayMenuHandles {
     theme_dark: CheckMenuItem<Wry>,
     theme_light: CheckMenuItem<Wry>,
     auto_theme: CheckMenuItem<Wry>,
+    sunset_offset_menu: Submenu<Wry>,
+    sunset_offset_5: CheckMenuItem<Wry>,
+    sunset_offset_10: CheckMenuItem<Wry>,
+    sunset_offset_15: CheckMenuItem<Wry>,
+    sunset_offset_custom: MenuItem<Wry>,
     startup: CheckMenuItem<Wry>,
     language_menu: Submenu<Wry>,
     language_auto: CheckMenuItem<Wry>,
@@ -95,6 +105,57 @@ fn refresh_auto_theme_menu_item() {
     }
 }
 
+fn sync_sunset_offset_menu_items(
+    option_5: &CheckMenuItem<Wry>,
+    option_10: &CheckMenuItem<Wry>,
+    option_15: &CheckMenuItem<Wry>,
+    minutes: i64,
+) {
+    let selected_5 = minutes == 5;
+    let selected_10 = minutes == 10;
+    let selected_15 = minutes == 15;
+
+    let _ = option_5.set_checked(selected_5);
+    let _ = option_5.set_enabled(!selected_5);
+    let _ = option_10.set_checked(selected_10);
+    let _ = option_10.set_enabled(!selected_10);
+    let _ = option_15.set_checked(selected_15);
+    let _ = option_15.set_enabled(!selected_15);
+}
+
+fn refresh_sunset_offset_menu_item() {
+    let settings = crate::commands::get_solar_settings();
+    let language_settings = i18n::get_language_settings();
+    let current_language = language_settings.resolved;
+
+    let Ok(handles_guard) = tray_menu_handles().lock() else {
+        return;
+    };
+
+    if let Some(handles) = handles_guard.as_ref() {
+        let Ok(solar_settings) = settings else {
+            return;
+        };
+
+        let _ = handles
+            .sunset_offset_menu
+            .set_text(&i18n::tray_sunset_offset_menu_label(&current_language));
+        sync_sunset_offset_menu_items(
+            &handles.sunset_offset_5,
+            &handles.sunset_offset_10,
+            &handles.sunset_offset_15,
+            solar_settings.sunset_offset_minutes,
+        );
+        let _ = handles
+            .sunset_offset_custom
+            .set_text(&i18n::tray_sunset_offset_custom_label(
+                &current_language,
+                solar_settings.sunset_offset_minutes,
+            ));
+        let _ = handles.sunset_offset_custom.set_enabled(true);
+    }
+}
+
 fn refresh_startup_menu_item() {
     let Ok(startup_state) = crate::commands::get_startup_state() else {
         return;
@@ -134,6 +195,30 @@ pub fn refresh_tray_language() -> Result<()> {
             handles
                 .auto_theme
                 .set_checked(solar_settings.auto_theme_enabled)?;
+            handles
+                .sunset_offset_menu
+                .set_text(&i18n::tray_sunset_offset_menu_label(&current_language))?;
+            handles
+                .sunset_offset_5
+                .set_text(&i18n::tray_sunset_offset_option_label(&current_language, 5))?;
+            handles
+                .sunset_offset_10
+                .set_text(&i18n::tray_sunset_offset_option_label(&current_language, 10))?;
+            handles
+                .sunset_offset_15
+                .set_text(&i18n::tray_sunset_offset_option_label(&current_language, 15))?;
+            sync_sunset_offset_menu_items(
+                &handles.sunset_offset_5,
+                &handles.sunset_offset_10,
+                &handles.sunset_offset_15,
+                solar_settings.sunset_offset_minutes,
+            );
+            handles
+                .sunset_offset_custom
+                .set_text(&i18n::tray_sunset_offset_custom_label(
+                    &current_language,
+                    solar_settings.sunset_offset_minutes,
+                ))?;
         }
         handles
             .startup
@@ -180,6 +265,7 @@ fn build_tray_menu(app: &AppHandle, allow_open_main: bool) -> Result<(Menu<Wry>,
     let solar_settings = crate::commands::get_solar_settings().unwrap_or(crate::models::SolarSettings {
         location: None,
         auto_theme_enabled: false,
+        sunset_offset_minutes: 0,
     });
 
     let theme_dark = CheckMenuItem::with_id(
@@ -210,6 +296,55 @@ fn build_tray_menu(app: &AppHandle, allow_open_main: bool) -> Result<(Menu<Wry>,
         true,
         solar_settings.auto_theme_enabled,
         None::<&str>,
+    )?;
+    let sunset_offset_5 = CheckMenuItem::with_id(
+        app,
+        MENU_SUNSET_OFFSET_5,
+        &i18n::tray_sunset_offset_option_label(&current_language, 5),
+        solar_settings.sunset_offset_minutes != 5,
+        solar_settings.sunset_offset_minutes == 5,
+        None::<&str>,
+    )?;
+    let sunset_offset_10 = CheckMenuItem::with_id(
+        app,
+        MENU_SUNSET_OFFSET_10,
+        &i18n::tray_sunset_offset_option_label(&current_language, 10),
+        solar_settings.sunset_offset_minutes != 10,
+        solar_settings.sunset_offset_minutes == 10,
+        None::<&str>,
+    )?;
+    let sunset_offset_15 = CheckMenuItem::with_id(
+        app,
+        MENU_SUNSET_OFFSET_15,
+        &i18n::tray_sunset_offset_option_label(&current_language, 15),
+        solar_settings.sunset_offset_minutes != 15,
+        solar_settings.sunset_offset_minutes == 15,
+        None::<&str>,
+    )?;
+    let sunset_offset_custom = MenuItem::with_id(
+        app,
+        MENU_SUNSET_OFFSET_CUSTOM,
+        &i18n::tray_sunset_offset_custom_label(
+            &current_language,
+            solar_settings.sunset_offset_minutes,
+        ),
+        true,
+        None::<&str>,
+    )?;
+    let sunset_offset_separator = PredefinedMenuItem::separator(app)?;
+    let sunset_offset_items: Vec<&dyn tauri::menu::IsMenuItem<Wry>> = vec![
+        &sunset_offset_5,
+        &sunset_offset_10,
+        &sunset_offset_15,
+        &sunset_offset_separator,
+        &sunset_offset_custom,
+    ];
+    let sunset_offset_menu = Submenu::with_id_and_items(
+        app,
+        MENU_SUNSET_OFFSET_MENU,
+        &i18n::tray_sunset_offset_menu_label(&current_language),
+        true,
+        &sunset_offset_items,
     )?;
 
     let startup_state = crate::commands::get_startup_state()
@@ -271,6 +406,7 @@ fn build_tray_menu(app: &AppHandle, allow_open_main: bool) -> Result<(Menu<Wry>,
             &theme_dark,
             &theme_light,
             &auto_theme,
+            &sunset_offset_menu,
             &startup,
             &language_menu,
             &separator_bottom,
@@ -283,6 +419,11 @@ fn build_tray_menu(app: &AppHandle, allow_open_main: bool) -> Result<(Menu<Wry>,
         theme_dark,
         theme_light,
         auto_theme,
+        sunset_offset_menu,
+        sunset_offset_5,
+        sunset_offset_10,
+        sunset_offset_15,
+        sunset_offset_custom,
         startup,
         language_menu,
         language_auto,
@@ -306,6 +447,7 @@ pub fn setup_tray(app: &AppHandle, allow_open_main: bool) -> Result<()> {
 
     app.listen_any(crate::commands::SOLAR_SETTINGS_CHANGED_EVENT, move |_| {
         refresh_auto_theme_menu_item();
+        refresh_sunset_offset_menu_item();
     });
 
     app.listen_any(crate::commands::STARTUP_STATE_CHANGED_EVENT, move |_| {
@@ -375,6 +517,24 @@ pub fn setup_tray(app: &AppHandle, allow_open_main: bool) -> Result<()> {
                         !settings.auto_theme_enabled,
                     );
                     refresh_auto_theme_menu_item();
+                    refresh_sunset_offset_menu_item();
+                }
+                MENU_SUNSET_OFFSET_5 => {
+                    let _ = crate::commands::set_sunset_offset_minutes(app.clone(), 5);
+                    refresh_sunset_offset_menu_item();
+                }
+                MENU_SUNSET_OFFSET_10 => {
+                    let _ = crate::commands::set_sunset_offset_minutes(app.clone(), 10);
+                    refresh_sunset_offset_menu_item();
+                }
+                MENU_SUNSET_OFFSET_15 => {
+                    let _ = crate::commands::set_sunset_offset_minutes(app.clone(), 15);
+                    refresh_sunset_offset_menu_item();
+                }
+                MENU_SUNSET_OFFSET_CUSTOM => {
+                    if allow_open_main {
+                        open_main_window(app);
+                    }
                 }
                 MENU_STARTUP => {
                     let current_state = crate::commands::get_startup_state();
@@ -419,6 +579,7 @@ pub fn setup_tray(app: &AppHandle, allow_open_main: bool) -> Result<()> {
             } => {
                 refresh_theme_menu_items();
                 refresh_auto_theme_menu_item();
+                refresh_sunset_offset_menu_item();
                 refresh_startup_menu_item();
                 let _ = refresh_tray_language();
             }

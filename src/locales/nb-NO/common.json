@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Automatisk bytte: Ikke konfigurert (Klikk for å sette opp)",
   "tray.auto_theme.on": "Automatisk bytte: På",
   "tray.auto_theme.off": "Automatisk bytte: Av",
+  "tray.sunset_offset.menu": "Tidligere aktivering av nattmodus",
+  "tray.sunset_offset.option": "{minutes} min tidligere",
+  "tray.sunset_offset.custom": "Tilpasset... (nåværende: {minutes} min tidligere)",
   "errors.auto_theme_configuration_required": "Lagre en adresse i Solinnstillinger før du aktiverer automatisk bytte.",
   "errors.registry.open_failed": "Kunne ikke åpne registeret: {source}",
   "errors.registry.write_apps_theme_failed": "Kunne ikke skrive AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Deaktivert",
   "tray.startup": "Kjør ved oppstart"
 }
+

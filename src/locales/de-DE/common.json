@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Automatischer Wechsel: Nicht konfiguriert (Klicken zum Einrichten)",
   "tray.auto_theme.on": "Automatischer Wechsel: Ein",
   "tray.auto_theme.off": "Automatischer Wechsel: Aus",
+  "tray.sunset_offset.menu": "Früheres Umschalten auf Dunkel",
+  "tray.sunset_offset.option": "{minutes} Min früher",
+  "tray.sunset_offset.custom": "Benutzerdefiniert... (aktuell: {minutes} Min früher)",
   "errors.auto_theme_configuration_required": "Bitte speichern Sie zuerst eine Adresse in den Solareinstellungen, bevor Sie den automatischen Wechsel aktivieren.",
   "errors.registry.open_failed": "Registrierung konnte nicht geöffnet werden: {source}",
   "errors.registry.write_apps_theme_failed": "AppsUseLightTheme konnte nicht geschrieben werden: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Deaktiviert",
   "tray.startup": "Beim Start ausführen"
 }
+

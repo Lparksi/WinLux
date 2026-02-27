@@ -3,7 +3,7 @@ import { writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const DEFAULT_VERSION = '0.3.0'
+const DEFAULT_VERSION = '0.3.1'
 
 const command = process.argv[2]
 if (!command || (command !== 'dev' && command !== 'build')) {

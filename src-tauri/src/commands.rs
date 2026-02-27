@@ -2,7 +2,7 @@ use crate::models::{
     AppError, AppResult, GeocodeResult, LanguageSettings, SolarSettings, StartupState,
     SunTimesResult, ThemeMode, ThemeState,
 };
-use chrono::{DateTime, Datelike, Local, NaiveDate, Utc};
+use chrono::{DateTime, Datelike, Duration as ChronoDuration, Local, NaiveDate, Utc};
 use serde::Deserialize;
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
@@ -26,6 +26,8 @@ const SETTINGS_VALUE_SOLAR_DISPLAY_NAME: &str = "SolarDisplayName";
 const SETTINGS_VALUE_SOLAR_LATITUDE: &str = "SolarLatitude";
 const SETTINGS_VALUE_SOLAR_LONGITUDE: &str = "SolarLongitude";
 const SETTINGS_VALUE_SOLAR_AUTO_THEME_ENABLED: &str = "SolarAutoThemeEnabled";
+const SETTINGS_VALUE_SOLAR_SUNSET_OFFSET_MINUTES: &str = "SolarSunsetOffsetMinutes";
+const SOLAR_SUNSET_OFFSET_MINUTES_MAX: i64 = 720;
 const NOMINATIM_SEARCH_URL: &str = "https://nominatim.openstreetmap.org/search";
 const NOMINATIM_USER_AGENT: &str =
     concat!("WinLux/", env!("CARGO_PKG_VERSION"), " (+https://github.com/Lparksi/WinLux)");
@@ -180,7 +182,12 @@ fn apply_auto_theme_for_app_and_get_wait_duration(app: &AppHandle) -> AppResult<
         .ok_or_else(|| err("errors.auto_theme.location_not_saved"))?;
     let now_local = Local::now();
     let local_date = now_local.date_naive();
-    let sun_times = build_sun_times_result(location, local_date, now_local)?;
+    let sun_times = build_sun_times_result_with_sunset_offset(
+        location,
+        local_date,
+        now_local,
+        settings.sunset_offset_minutes,
+    )?;
 
     let desired_state = ThemeState {
         apps: sun_times.recommended_theme,
@@ -308,6 +315,22 @@ pub fn set_auto_theme_enabled(app: AppHandle, enabled: bool) -> AppResult<SolarS
 }
 
 #[tauri::command]
+pub fn set_sunset_offset_minutes(app: AppHandle, minutes: i64) -> AppResult<SolarSettings> {
+    let normalized_minutes = normalize_sunset_offset_minutes(minutes)?;
+    set_sunset_offset_minutes_internal(normalized_minutes)?;
+
+    let settings = get_solar_settings_internal()?;
+    let _ = app.emit(SOLAR_SETTINGS_CHANGED_EVENT, &settings);
+    notify_auto_theme_worker();
+
+    if settings.auto_theme_enabled {
+        let _ = apply_auto_theme_for_app(&app);
+    }
+
+    Ok(settings)
+}
+
+#[tauri::command]
 pub async fn get_sun_times_by_address(
     address: String,
     date: Option<String>,
@@ -334,6 +357,15 @@ fn build_sun_times_result(
     local_date: NaiveDate,
     now_local: DateTime<Local>,
 ) -> AppResult<SunTimesResult> {
+    build_sun_times_result_with_sunset_offset(geocode, local_date, now_local, 0)
+}
+
+fn build_sun_times_result_with_sunset_offset(
+    geocode: GeocodeResult,
+    local_date: NaiveDate,
+    now_local: DateTime<Local>,
+    sunset_offset_minutes: i64,
+) -> AppResult<SunTimesResult> {
     #[allow(deprecated)]
     let (sunrise_ts, sunset_ts) = sunrise::sunrise_sunset(
         geocode.latitude,
@@ -350,10 +382,14 @@ fn build_sun_times_result(
 
     let sunrise_local = sunrise_utc.with_timezone(&Local);
     let sunset_local = sunset_utc.with_timezone(&Local);
+    let normalized_sunset_offset_minutes = normalize_sunset_offset_minutes(sunset_offset_minutes)?;
+    let adjusted_sunset_local =
+        sunset_local - ChronoDuration::minutes(normalized_sunset_offset_minutes);
+    let adjusted_sunset_utc = adjusted_sunset_local.with_timezone(&Utc);
     let day_length_seconds = (sunset_ts - sunrise_ts).max(0);
     let day_length_hms = format_hms(day_length_seconds);
 
-    let is_daylight = now_local >= sunrise_local && now_local < sunset_local;
+    let is_daylight = now_local >= sunrise_local && now_local < adjusted_sunset_local;
     let recommended_theme = if is_daylight {
         ThemeMode::Light
     } else {
@@ -362,8 +398,8 @@ fn build_sun_times_result(
 
     let (next_transition, next_transition_utc, next_transition_local) = if now_local < sunrise_local {
         ("sunrise", sunrise_utc, sunrise_local)
-    } else if now_local < sunset_local {
-        ("sunset", sunset_utc, sunset_local)
+    } else if now_local < adjusted_sunset_local {
+        ("sunset", adjusted_sunset_utc, adjusted_sunset_local)
     } else {
         let next_date = local_date
             .succ_opt()
@@ -445,6 +481,7 @@ fn get_solar_settings_internal() -> AppResult<SolarSettings> {
             return Ok(SolarSettings {
                 location: None,
                 auto_theme_enabled: false,
+                sunset_offset_minutes: 0,
             });
         }
     };
@@ -462,6 +499,11 @@ fn get_solar_settings_internal() -> AppResult<SolarSettings> {
     let auto_theme_enabled_raw: u32 = key
         .get_value(SETTINGS_VALUE_SOLAR_AUTO_THEME_ENABLED)
         .unwrap_or(0);
+    let sunset_offset_minutes_raw: u32 = key
+        .get_value(SETTINGS_VALUE_SOLAR_SUNSET_OFFSET_MINUTES)
+        .unwrap_or(0);
+    let sunset_offset_minutes =
+        normalize_sunset_offset_minutes(i64::from(sunset_offset_minutes_raw)).unwrap_or(0);
 
     let location = if address.trim().is_empty() || display_name.trim().is_empty() {
         None
@@ -483,6 +525,7 @@ fn get_solar_settings_internal() -> AppResult<SolarSettings> {
     Ok(SolarSettings {
         location,
         auto_theme_enabled: auto_theme_enabled_raw != 0,
+        sunset_offset_minutes,
     })
 }
 
@@ -528,6 +571,35 @@ fn set_auto_theme_enabled_internal(enabled: bool) -> AppResult<()> {
     let value: u32 = if enabled { 1 } else { 0 };
     key.set_value(SETTINGS_VALUE_SOLAR_AUTO_THEME_ENABLED, &value)
         .map_err(|error| err_with_source("errors.solar.save_auto_theme_enabled_failed", error))?;
+
+    Ok(())
+}
+
+fn normalize_sunset_offset_minutes(minutes: i64) -> AppResult<i64> {
+    if minutes < 0 || minutes > SOLAR_SUNSET_OFFSET_MINUTES_MAX {
+        return Err(err("errors.solar.invalid_sunset_offset_minutes")
+            .with_param("min", 0)
+            .with_param("max", SOLAR_SUNSET_OFFSET_MINUTES_MAX)
+            .with_param("value", minutes));
+    }
+
+    Ok(minutes)
+}
+
+fn set_sunset_offset_minutes_internal(minutes: i64) -> AppResult<()> {
+    use winreg::enums::HKEY_CURRENT_USER;
+    use winreg::RegKey;
+
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let (key, _) = hkcu
+        .create_subkey(SETTINGS_KEY)
+        .map_err(|error| err_with_source("errors.registry.create_settings_failed", error))?;
+
+    let value = u32::try_from(minutes)
+        .map_err(|error| err_with_source("errors.solar.save_sunset_offset_minutes_failed", error))?;
+
+    key.set_value(SETTINGS_VALUE_SOLAR_SUNSET_OFFSET_MINUTES, &value)
+        .map_err(|error| err_with_source("errors.solar.save_sunset_offset_minutes_failed", error))?;
 
     Ok(())
 }

@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Commutazione automatica: Non configurata (clicca per configurare)",
   "tray.auto_theme.on": "Commutazione automatica: Attiva",
   "tray.auto_theme.off": "Commutazione automatica: Disattiva",
+  "tray.sunset_offset.menu": "Attivazione anticipata modalità notturna",
+  "tray.sunset_offset.option": "{minutes} min prima",
+  "tray.sunset_offset.custom": "Personalizzato... (attuale: {minutes} min prima)",
   "errors.auto_theme_configuration_required": "Salva un indirizzo nelle impostazioni solari prima di attivare la commutazione automatica.",
   "errors.registry.open_failed": "Impossibile aprire il registro: {source}",
   "errors.registry.write_apps_theme_failed": "Impossibile scrivere AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Disabilitato",
   "tray.startup": "Esegui all'avvio"
 }
+

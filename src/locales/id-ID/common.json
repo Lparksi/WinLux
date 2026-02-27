@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Pengalihan otomatis: Belum dikonfigurasi (Klik untuk mengatur)",
   "tray.auto_theme.on": "Pengalihan otomatis: Aktif",
   "tray.auto_theme.off": "Pengalihan otomatis: Nonaktif",
+  "tray.sunset_offset.menu": "Pemicu lebih awal mode malam",
+  "tray.sunset_offset.option": "{minutes} menit lebih awal",
+  "tray.sunset_offset.custom": "Kustom... (saat ini: {minutes} menit lebih awal)",
   "errors.auto_theme_configuration_required": "Simpan alamat di Pengaturan Matahari sebelum mengaktifkan pengalihan otomatis.",
   "errors.registry.open_failed": "Gagal membuka registri: {source}",
   "errors.registry.write_apps_theme_failed": "Gagal menulis AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Nonaktif",
   "tray.startup": "Jalankan saat startup"
 }
+

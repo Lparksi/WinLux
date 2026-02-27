@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Troca automática: Não configurada (clique para configurar)",
   "tray.auto_theme.on": "Troca automática: Ligada",
   "tray.auto_theme.off": "Troca automática: Desligada",
+  "tray.sunset_offset.menu": "Disparo antecipado do modo noturno",
+  "tray.sunset_offset.option": "{minutes} min antes",
+  "tray.sunset_offset.custom": "Personalizado... (atual: {minutes} min antes)",
   "errors.auto_theme_configuration_required": "Salve um endereço nas configurações solares antes de ativar a troca automática.",
   "errors.registry.open_failed": "Falha ao abrir o registro: {source}",
   "errors.registry.write_apps_theme_failed": "Falha ao gravar AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Desativado",
   "tray.startup": "Executar na inicialização"
 }
+

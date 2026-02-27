@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "自動切替：未設定（クリックで設定）",
   "tray.auto_theme.on": "自動切替：オン",
   "tray.auto_theme.off": "自動切替：オフ",
+  "tray.sunset_offset.menu": "ナイトモードの早期切り替え",
+  "tray.sunset_offset.option": "{minutes}分早く",
+  "tray.sunset_offset.custom": "カスタム...（現在: {minutes}分早く）",
   "errors.auto_theme_configuration_required": "自動切り替えを有効にする前に、日照設定で住所を保存してください。",
   "errors.registry.open_failed": "レジストリを開けませんでした: {source}",
   "errors.registry.write_apps_theme_failed": "AppsUseLightTheme の書き込みに失敗しました: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "無効",
   "tray.startup": "起動時に実行"
 }
+

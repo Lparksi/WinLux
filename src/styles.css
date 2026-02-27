@@ -385,6 +385,17 @@ button:disabled {
   gap: 8px;
 }
 
+.customOffsetRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.customOffsetApply {
+  white-space: nowrap;
+}
+
 .startupSwitchRow {
   margin-bottom: 4px;
 }
@@ -477,6 +488,10 @@ button:disabled {
   .solarActions,
   .switchRow,
   .resultList {
+    grid-template-columns: 1fr;
+  }
+
+  .customOffsetRow {
     grid-template-columns: 1fr;
   }
 

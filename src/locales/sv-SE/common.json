@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Automatisk växling: Inte konfigurerad (Klicka för att konfigurera)",
   "tray.auto_theme.on": "Automatisk växling: På",
   "tray.auto_theme.off": "Automatisk växling: Av",
+  "tray.sunset_offset.menu": "Tidigare aktivering av nattläge",
+  "tray.sunset_offset.option": "{minutes} min tidigare",
+  "tray.sunset_offset.custom": "Anpassad... (nuvarande: {minutes} min tidigare)",
   "errors.auto_theme_configuration_required": "Spara en adress i Solinställningar innan du aktiverar automatisk växling.",
   "errors.registry.open_failed": "Kunde inte öppna registret: {source}",
   "errors.registry.write_apps_theme_failed": "Kunde inte skriva AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Inaktiverad",
   "tray.startup": "Kör vid uppstart"
 }
+

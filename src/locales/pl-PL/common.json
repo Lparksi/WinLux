@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Automatyczne przełączanie: Nieskonfigurowane (Kliknij, aby skonfigurować)",
   "tray.auto_theme.on": "Automatyczne przełączanie: Włączone",
   "tray.auto_theme.off": "Automatyczne przełączanie: Wyłączone",
+  "tray.sunset_offset.menu": "Wcześniejsze uruchamianie trybu nocnego",
+  "tray.sunset_offset.option": "{minutes} min wcześniej",
+  "tray.sunset_offset.custom": "Niestandardowe... (obecnie: {minutes} min wcześniej)",
   "errors.auto_theme_configuration_required": "Przed włączeniem automatycznego przełączania zapisz adres w Ustawieniach słonecznych.",
   "errors.registry.open_failed": "Nie udało się otworzyć rejestru: {source}",
   "errors.registry.write_apps_theme_failed": "Nie udało się zapisać AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Wyłączone",
   "tray.startup": "Uruchamiaj przy starcie"
 }
+

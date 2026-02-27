@@ -79,6 +79,7 @@ pub struct SunTimesResult {
 pub struct SolarSettings {
     pub location: Option<GeocodeResult>,
     pub auto_theme_enabled: bool,
+    pub sunset_offset_minutes: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Bascule auto : non configurée (cliquez pour configurer)",
   "tray.auto_theme.on": "Bascule auto : activée",
   "tray.auto_theme.off": "Bascule auto : désactivée",
+  "tray.sunset_offset.menu": "Déclenchement anticipé du mode nuit",
+  "tray.sunset_offset.option": "{minutes} min plus tôt",
+  "tray.sunset_offset.custom": "Personnalisé... (actuel : {minutes} min plus tôt)",
   "errors.auto_theme_configuration_required": "Veuillez enregistrer une adresse dans les paramètres solaires avant d'activer la bascule auto.",
   "errors.registry.open_failed": "Échec de l'ouverture du registre : {source}",
   "errors.registry.write_apps_theme_failed": "Échec de l'écriture de AppsUseLightTheme : {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Désactivé",
   "tray.startup": "Lancer au démarrage"
 }
+

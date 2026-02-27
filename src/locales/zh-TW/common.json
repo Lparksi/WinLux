@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "自動切換：未配置（點擊前往設定）",
   "tray.auto_theme.on": "自動切換：開啟",
   "tray.auto_theme.off": "自動切換：關閉",
+  "tray.sunset_offset.menu": "夜間模式提前觸發",
+  "tray.sunset_offset.option": "提前 {minutes} 分鐘",
+  "tray.sunset_offset.custom": "自訂…（目前提前 {minutes} 分鐘）",
   "errors.auto_theme_configuration_required": "請先在「地址日照與自動切換」中儲存地址，再啟用自動切換。",
   "errors.registry.open_failed": "開啟登錄檔失敗：{source}",
   "errors.registry.write_apps_theme_failed": "寫入 AppsUseLightTheme 失敗：{source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "已停用",
   "tray.startup": "開機自啟"
 }
+

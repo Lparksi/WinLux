@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "자동 전환: 미설정(클릭하여 설정)",
   "tray.auto_theme.on": "자동 전환: 켜짐",
   "tray.auto_theme.off": "자동 전환: 꺼짐",
+  "tray.sunset_offset.menu": "야간 모드 조기 전환",
+  "tray.sunset_offset.option": "{minutes}분 일찍",
+  "tray.sunset_offset.custom": "사용자 지정... (현재: {minutes}분 일찍)",
   "errors.auto_theme_configuration_required": "자동 전환을 켜기 전에 일조 설정에서 주소를 먼저 저장하세요.",
   "errors.registry.open_failed": "레지스트리를 열지 못했습니다: {source}",
   "errors.registry.write_apps_theme_failed": "AppsUseLightTheme 쓰기에 실패했습니다: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "비활성화됨",
   "tray.startup": "시작 시 실행"
 }
+

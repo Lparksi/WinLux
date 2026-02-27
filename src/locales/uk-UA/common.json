@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Автоперемикання: Не налаштовано (Натисніть для налаштування)",
   "tray.auto_theme.on": "Автоперемикання: Увімкнено",
   "tray.auto_theme.off": "Автоперемикання: Вимкнено",
+  "tray.sunset_offset.menu": "Ранній запуск нічного режиму",
+  "tray.sunset_offset.option": "На {minutes} хв раніше",
+  "tray.sunset_offset.custom": "Користувацьке... (поточне: на {minutes} хв раніше)",
   "errors.auto_theme_configuration_required": "Збережіть адресу в сонячних налаштуваннях перед увімкненням автоперемикання.",
   "errors.registry.open_failed": "Не вдалося відкрити реєстр: {source}",
   "errors.registry.write_apps_theme_failed": "Не вдалося записати AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Вимкнено",
   "tray.startup": "Запускати під час входу"
 }
+

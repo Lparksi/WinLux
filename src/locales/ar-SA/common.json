@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "التبديل التلقائي: غير مكوَّن (انقر للإعداد)",
   "tray.auto_theme.on": "التبديل التلقائي: تشغيل",
   "tray.auto_theme.off": "التبديل التلقائي: إيقاف",
+  "tray.sunset_offset.menu": "تفعيل الوضع الليلي مبكرًا",
+  "tray.sunset_offset.option": "قبل الموعد بـ {minutes} دقيقة",
+  "tray.sunset_offset.custom": "مخصص... (الحالي: قبل الموعد بـ {minutes} دقيقة)",
   "errors.auto_theme_configuration_required": "يرجى حفظ عنوان في إعدادات الشمس قبل تفعيل التبديل التلقائي.",
   "errors.registry.open_failed": "فشل فتح سجل النظام: {source}",
   "errors.registry.write_apps_theme_failed": "فشل كتابة AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "معطل",
   "tray.startup": "تشغيل عند بدء التشغيل"
 }
+

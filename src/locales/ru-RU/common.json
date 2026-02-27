@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Автопереключение: не настроено (нажмите для настройки)",
   "tray.auto_theme.on": "Автопереключение: включено",
   "tray.auto_theme.off": "Автопереключение: выключено",
+  "tray.sunset_offset.menu": "Раннее включение ночного режима",
+  "tray.sunset_offset.option": "На {minutes} мин раньше",
+  "tray.sunset_offset.custom": "Пользовательское... (текущее: на {minutes} мин раньше)",
   "errors.auto_theme_configuration_required": "Сохраните адрес в солнечных настройках перед включением автопереключения.",
   "errors.registry.open_failed": "Не удалось открыть реестр: {source}",
   "errors.registry.write_apps_theme_failed": "Не удалось записать AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Выключено",
   "tray.startup": "Запускать при старте"
 }
+

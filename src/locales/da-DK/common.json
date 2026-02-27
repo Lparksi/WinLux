@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Automatisk skift: Ikke konfigureret (Klik for opsætning)",
   "tray.auto_theme.on": "Automatisk skift: Til",
   "tray.auto_theme.off": "Automatisk skift: Fra",
+  "tray.sunset_offset.menu": "Tidligere aktivering af nattilstand",
+  "tray.sunset_offset.option": "{minutes} min tidligere",
+  "tray.sunset_offset.custom": "Brugerdefineret... (nuværende: {minutes} min tidligere)",
   "errors.auto_theme_configuration_required": "Gem venligst en adresse i Solindstillinger, før du aktiverer automatisk skift.",
   "errors.registry.open_failed": "Kunne ikke åbne registreringsdatabasen: {source}",
   "errors.registry.write_apps_theme_failed": "Kunne ikke skrive AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Deaktiveret",
   "tray.startup": "Kør ved opstart"
 }
+

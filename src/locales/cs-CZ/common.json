@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Automatické přepínání: Není nakonfigurováno (Klikněte pro nastavení)",
   "tray.auto_theme.on": "Automatické přepínání: Zapnuto",
   "tray.auto_theme.off": "Automatické přepínání: Vypnuto",
+  "tray.sunset_offset.menu": "Dřívější spuštění nočního režimu",
+  "tray.sunset_offset.option": "O {minutes} min dříve",
+  "tray.sunset_offset.custom": "Vlastní... (aktuálně: o {minutes} min dříve)",
   "errors.auto_theme_configuration_required": "Před zapnutím automatického přepínání nejprve uložte adresu v solárním nastavení.",
   "errors.registry.open_failed": "Nepodařilo se otevřít registr: {source}",
   "errors.registry.write_apps_theme_failed": "Nepodařilo se zapsat AppsUseLightTheme: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Vypnuto",
   "tray.startup": "Spustit při startu"
 }
+

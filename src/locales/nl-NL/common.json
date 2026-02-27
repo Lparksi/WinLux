@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "Automatisch schakelen: Niet geconfigureerd (Klik om in te stellen)",
   "tray.auto_theme.on": "Automatisch schakelen: Aan",
   "tray.auto_theme.off": "Automatisch schakelen: Uit",
+  "tray.sunset_offset.menu": "Vroegere activering van nachtmodus",
+  "tray.sunset_offset.option": "{minutes} min eerder",
+  "tray.sunset_offset.custom": "Aangepast... (huidig: {minutes} min eerder)",
   "errors.auto_theme_configuration_required": "Sla eerst een adres op in Zonne-instellingen voordat u automatisch schakelen inschakelt.",
   "errors.registry.open_failed": "Kan register niet openen: {source}",
   "errors.registry.write_apps_theme_failed": "Kan AppsUseLightTheme niet schrijven: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "Uitgeschakeld",
   "tray.startup": "Uitvoeren bij opstarten"
 }
+

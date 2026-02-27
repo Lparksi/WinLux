@@ -66,6 +66,9 @@
   "tray.auto_theme.not_configured": "สลับอัตโนมัติ: ยังไม่ตั้งค่า (คลิกเพื่อตั้งค่า)",
   "tray.auto_theme.on": "สลับอัตโนมัติ: เปิด",
   "tray.auto_theme.off": "สลับอัตโนมัติ: ปิด",
+  "tray.sunset_offset.menu": "ทริกเกอร์โหมดกลางคืนล่วงหน้า",
+  "tray.sunset_offset.option": "ล่วงหน้า {minutes} นาที",
+  "tray.sunset_offset.custom": "กำหนดเอง... (ปัจจุบัน: ล่วงหน้า {minutes} นาที)",
   "errors.auto_theme_configuration_required": "โปรดบันทึกที่อยู่ในการตั้งค่าดวงอาทิตย์ก่อนเปิดการสลับอัตโนมัติ",
   "errors.registry.open_failed": "ไม่สามารถเปิดรีจิสทรีได้: {source}",
   "errors.registry.write_apps_theme_failed": "ไม่สามารถเขียนค่า AppsUseLightTheme ได้: {source}",
@@ -104,3 +107,4 @@
   "startup.status_disabled": "ปิดใช้งาน",
   "tray.startup": "เรียกใช้เมื่อเริ่มระบบ"
 }
+
