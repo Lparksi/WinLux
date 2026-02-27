@@ -14,9 +14,9 @@ on:
         required: false
         type: string
       package_identifier:
-        description: "winget package identifier"
+        description: "winget package identifier (default: {repoOwner}.{repoName})"
         required: false
-        default: "Lparski.WinLux"
+        default: "Lparksi.WinLux"
         type: string
       skip_if_newer_exists:
         description: "Skip if winget already contains a newer version (recommended: true)"
@@ -49,7 +49,8 @@ jobs:
 
             const requestedTag = (context.payload.inputs?.tag || '').trim();
             const requestedPackageId = (context.payload.inputs?.package_identifier || '').trim();
-            const packageId = requestedPackageId || 'Lparski.WinLux';
+            const inferredPackageId = `${context.repo.owner}.${context.repo.repo}`;
+            const packageId = requestedPackageId || inferredPackageId;
 
             if (!/^[A-Za-z0-9][A-Za-z0-9.-]+$/.test(packageId)) {
               core.setFailed(`Invalid package identifier: ${packageId}`);
@@ -230,6 +231,7 @@ jobs:
 
             const manifestPath = `manifests/${packageId[0].toLowerCase()}/${packageId.split('.').join('/')}`;
             let versions = [];
+            let packageExists = true;
 
             try {
               const response = await github.rest.repos.getContent({
@@ -246,6 +248,12 @@ jobs:
               if (error.status !== 404) {
                 throw error;
               }
+              packageExists = false;
+            }
+
+            if (!packageExists) {
+              skip(`winget package ${packageId} was not found in winget-pkgs. Initial onboarding is required before automated updates can run.`);
+              return;
             }
 
             if (versions.includes(targetVersion)) {
@@ -341,8 +349,8 @@ jobs:
               $logText = Get-Content $logFile -Raw
             }
 
-            if ($logText -match '(?i)already exists|no update is available|open pull request|already has a pull request|version has already been submitted') {
-              Write-Host "WingetCreate detected an existing update state. Skip without overwrite."
+            if ($logText -match '(?i)already exists|no update is available|open pull request|already has a pull request|version has already been submitted|was not found|check if the provided package arguments are correct') {
+              Write-Host "WingetCreate detected a known non-fatal state. Skip without overwrite."
               exit 0
             }
 
