@@ -1,0 +1,348 @@
+name: WinLux Winget Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to submit to winget (for example: v0.3.2). Leave empty to use the latest release."
+        required: false
+        type: string
+      package_identifier:
+        description: "winget package identifier"
+        required: false
+        default: "Lparski.WinLux"
+        type: string
+      skip_if_newer_exists:
+        description: "Skip if winget already contains a newer version (recommended: true)"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winget-${{ github.workflow }}-${{ github.event.release.tag_name || github.event.inputs.tag || github.ref_name || 'latest' }}
+  cancel-in-progress: false
+
+jobs:
+  publish-winget:
+    name: Publish to winget
+    runs-on: windows-latest
+    timeout-minutes: 90
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'release' && github.event.release.draft == false && github.event.release.prerelease == false)
+
+    steps:
+      - name: Resolve release metadata
+        id: resolve
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const semverPattern = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+            const normalizeTag = (tag) => (tag || '').replace(/^[vV]/, '').trim();
+
+            const requestedTag = (context.payload.inputs?.tag || '').trim();
+            const requestedPackageId = (context.payload.inputs?.package_identifier || '').trim();
+            const packageId = requestedPackageId || 'Lparski.WinLux';
+
+            if (!/^[A-Za-z0-9][A-Za-z0-9.-]+$/.test(packageId)) {
+              core.setFailed(`Invalid package identifier: ${packageId}`);
+              return;
+            }
+
+            let release = context.payload.release;
+            if (context.eventName === 'workflow_dispatch') {
+              if (requestedTag) {
+                const tagCandidates = requestedTag.match(/^[vV]/) ? [requestedTag] : [requestedTag, `v${requestedTag}`];
+                let lastError = null;
+                for (const tag of tagCandidates) {
+                  try {
+                    const response = await github.rest.repos.getReleaseByTag({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      tag
+                    });
+                    release = response.data;
+                    break;
+                  } catch (error) {
+                    lastError = error;
+                  }
+                }
+                if (!release) {
+                  throw lastError || new Error(`Release not found by tag: ${requestedTag}`);
+                }
+              } else {
+                const response = await github.rest.repos.getLatestRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo
+                });
+                release = response.data;
+              }
+            } else if (context.eventName === 'push') {
+              const tag = (context.ref || '').replace('refs/tags/', '').trim();
+              if (!tag) {
+                core.setFailed('Unable to resolve tag from push event.');
+                return;
+              }
+
+              const maxAttempts = 120;
+              const delayMs = 30000;
+              for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+                try {
+                  const response = await github.rest.repos.getReleaseByTag({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    tag
+                  });
+                  release = response.data;
+                  if ((release.assets || []).length > 0) {
+                    break;
+                  }
+                  core.info(`Release ${tag} found but assets are not ready yet (attempt ${attempt}/${maxAttempts}).`);
+                } catch (error) {
+                  if (error.status !== 404) {
+                    throw error;
+                  }
+                  core.info(`Release ${tag} is not available yet (attempt ${attempt}/${maxAttempts}).`);
+                }
+
+                if (attempt < maxAttempts) {
+                  await new Promise((resolve) => setTimeout(resolve, delayMs));
+                }
+              }
+            }
+
+            if (!release) {
+              core.setFailed('Release data is missing.');
+              return;
+            }
+
+            if (release.draft || release.prerelease) {
+              core.setFailed(`Release ${release.tag_name} is draft/prerelease and will not be submitted to winget.`);
+              return;
+            }
+
+            const version = normalizeTag(release.tag_name);
+            if (!semverPattern.test(version)) {
+              core.setFailed(`Release tag must be semver (current: ${release.tag_name})`);
+              return;
+            }
+
+            const exeAssets = (release.assets || []).filter((asset) => asset.name.toLowerCase().endsWith('.exe'));
+            if (exeAssets.length === 0) {
+              core.setFailed(`No .exe installer asset found in release ${release.tag_name}`);
+              return;
+            }
+
+            const selectors = [
+              /x64.*setup\.exe$/i,
+              /setup.*x64.*\.exe$/i,
+              /x64.*\.exe$/i,
+              /setup\.exe$/i
+            ];
+
+            let installer = null;
+            for (const selector of selectors) {
+              installer = exeAssets.find((asset) => selector.test(asset.name));
+              if (installer) {
+                break;
+              }
+            }
+            if (!installer) {
+              installer = exeAssets[0];
+            }
+
+            let architecture = 'x64';
+            if (/arm64/i.test(installer.name)) {
+              architecture = 'arm64';
+            } else if (/x86/i.test(installer.name)) {
+              architecture = 'x86';
+            } else if (/x64/i.test(installer.name)) {
+              architecture = 'x64';
+            }
+
+            core.setOutput('package_identifier', packageId);
+            core.setOutput('tag', release.tag_name);
+            core.setOutput('version', version);
+            core.setOutput('installer_name', installer.name);
+            core.setOutput('installer_url', installer.browser_download_url);
+            core.setOutput('installer_architecture', architecture);
+            core.info(`Resolved: ${packageId} ${version} -> ${installer.name} (${architecture})`);
+
+      - name: Guard against overwrite
+        id: guard
+        uses: actions/github-script@v7
+        env:
+          PACKAGE_IDENTIFIER: ${{ steps.resolve.outputs.package_identifier }}
+          TARGET_VERSION: ${{ steps.resolve.outputs.version }}
+        with:
+          script: |
+            const packageId = process.env.PACKAGE_IDENTIFIER?.trim();
+            const targetVersion = process.env.TARGET_VERSION?.trim();
+            const skipIfNewer = (context.payload.inputs?.skip_if_newer_exists ?? 'true').toString().toLowerCase() !== 'false';
+
+            const semverPattern = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+([0-9A-Za-z.-]+))?$/;
+            const parseSemver = (value) => {
+              const match = value.match(semverPattern);
+              if (!match) {
+                return null;
+              }
+              return {
+                major: Number(match[1]),
+                minor: Number(match[2]),
+                patch: Number(match[3]),
+                prerelease: match[4] || ''
+              };
+            };
+
+            const compareSemver = (a, b) => {
+              const va = parseSemver(a);
+              const vb = parseSemver(b);
+              if (!va || !vb) {
+                return 0;
+              }
+              for (const key of ['major', 'minor', 'patch']) {
+                if (va[key] > vb[key]) return 1;
+                if (va[key] < vb[key]) return -1;
+              }
+              if (!va.prerelease && vb.prerelease) return 1;
+              if (va.prerelease && !vb.prerelease) return -1;
+              return va.prerelease.localeCompare(vb.prerelease);
+            };
+
+            const skip = (reason) => {
+              core.warning(reason);
+              core.setOutput('skip', 'true');
+              core.setOutput('reason', reason);
+            };
+
+            if (!packageId || !targetVersion) {
+              skip('Missing package identifier or target version.');
+              return;
+            }
+
+            const manifestPath = `manifests/${packageId[0].toLowerCase()}/${packageId.split('.').join('/')}`;
+            let versions = [];
+
+            try {
+              const response = await github.rest.repos.getContent({
+                owner: 'microsoft',
+                repo: 'winget-pkgs',
+                path: manifestPath
+              });
+              if (Array.isArray(response.data)) {
+                versions = response.data
+                  .filter((entry) => entry.type === 'dir')
+                  .map((entry) => entry.name);
+              }
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+            }
+
+            if (versions.includes(targetVersion)) {
+              skip(`winget already contains ${packageId} ${targetVersion}.`);
+              return;
+            }
+
+            if (skipIfNewer) {
+              const newerVersions = versions
+                .filter((version) => parseSemver(version))
+                .filter((version) => compareSemver(version, targetVersion) > 0)
+                .sort(compareSemver);
+
+              if (newerVersions.length > 0) {
+                skip(`winget already has a newer version (${newerVersions[newerVersions.length - 1]}), skip ${targetVersion}.`);
+                return;
+              }
+            }
+
+            try {
+              const query = `repo:microsoft/winget-pkgs is:pr is:open "${packageId}" "${targetVersion}"`;
+              const search = await github.rest.search.issuesAndPullRequests({ q: query, per_page: 10 });
+              if (search.data.total_count > 0) {
+                skip(`An open PR already exists for ${packageId} ${targetVersion}.`);
+                return;
+              }
+            } catch (error) {
+              core.warning(`PR duplicate check skipped: ${error.message}`);
+            }
+
+            core.setOutput('skip', 'false');
+            core.setOutput('reason', 'ready');
+            core.info(`No overwrite risk detected for ${packageId} ${targetVersion}.`);
+
+      - name: Explain skip reason
+        if: steps.guard.outputs.skip == 'true'
+        shell: pwsh
+        run: |
+          Write-Host "Skip publishing to winget: ${{ steps.guard.outputs.reason }}"
+
+      - name: Verify required secret
+        if: steps.guard.outputs.skip != 'true'
+        shell: pwsh
+        env:
+          WINGETCREATE_TOKEN: ${{ secrets.WINGETCREATE_TOKEN }}
+        run: |
+          if (-not $env:WINGETCREATE_TOKEN) {
+            throw "Missing required secret: WINGETCREATE_TOKEN"
+          }
+
+      - name: Download WingetCreate
+        if: steps.guard.outputs.skip != 'true'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest 'https://aka.ms/wingetcreate/latest' -OutFile 'wingetcreate.exe'
+          if (-not (Test-Path '.\wingetcreate.exe')) {
+            throw "wingetcreate.exe download failed."
+          }
+
+      - name: Submit manifest update
+        if: steps.guard.outputs.skip != 'true'
+        shell: pwsh
+        env:
+          WINGETCREATE_TOKEN: ${{ secrets.WINGETCREATE_TOKEN }}
+        run: |
+          $packageId = '${{ steps.resolve.outputs.package_identifier }}'
+          $version = '${{ steps.resolve.outputs.version }}'
+          $tag = '${{ steps.resolve.outputs.tag }}'
+          $installerUrl = '${{ steps.resolve.outputs.installer_url }}'
+          $installerArchitecture = '${{ steps.resolve.outputs.installer_architecture }}'
+
+          $prTitle = "New version: $packageId version $version"
+          $prBody = "Automated by $env:GITHUB_REPOSITORY from release $tag."
+          $args = @(
+            'update', $packageId,
+            '--urls', $installerUrl,
+            '--version', $version,
+            '--architecture', $installerArchitecture,
+            '--submit',
+            '--token', $env:WINGETCREATE_TOKEN,
+            '--prtitle', $prTitle,
+            '--prbody', $prBody
+          )
+
+          $logFile = Join-Path $PWD 'wingetcreate.log'
+          & .\wingetcreate.exe @args 2>&1 | Tee-Object -FilePath $logFile
+          $exitCode = $LASTEXITCODE
+
+          if ($exitCode -ne 0) {
+            $logText = ''
+            if (Test-Path $logFile) {
+              $logText = Get-Content $logFile -Raw
+            }
+
+            if ($logText -match '(?i)already exists|no update is available|open pull request|already has a pull request|version has already been submitted') {
+              Write-Host "WingetCreate detected an existing update state. Skip without overwrite."
+              exit 0
+            }
+
+            throw "WingetCreate failed with exit code $exitCode"
+          }
