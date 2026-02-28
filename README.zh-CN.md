@@ -64,6 +64,14 @@ WinLux 是一个基于 Tauri 2 + React 的轻量级 Windows 桌面工具。
 
 ## 快速开始
 
+通过 WinGet 安装：
+
+```bash
+winget install Lparksi.WinLux
+```
+
+或从源码构建/运行：
+
 ```bash
 bun install
 bun run tauri:dev

@@ -64,6 +64,14 @@ It lets you quickly switch Windows light/dark themes, stay in the system tray, m
 
 ## Quick Start
 
+Install from WinGet:
+
+```bash
+winget install Lparksi.WinLux
+```
+
+Or build/run from source:
+
 ```bash
 bun install
 bun run tauri:dev

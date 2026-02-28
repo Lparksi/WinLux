@@ -64,6 +64,14 @@ Windows 라이트/다크 테마를 빠르게 전환하고, 시스템 트레이 �
 
 ## 빠른 시작
 
+WinGet으로 설치:
+
+```bash
+winget install Lparksi.WinLux
+```
+
+또는 소스에서 빌드/실행:
+
 ```bash
 bun install
 bun run tauri:dev
